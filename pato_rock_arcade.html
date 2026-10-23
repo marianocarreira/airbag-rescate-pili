@@ -3,145 +3,179 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>AIRBAG: EL RESCATE DE PILI - Edición HD Cómic Ilustrado</title>
+  <title>AIRBAG: EL RESCATE DE PILI - Cartoon Arcade Edition</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Fredoka:wght@600;700&family=Montserrat:ital,wght@0,700;0,800;0,900;1,900&display=swap" rel="stylesheet">
   <style>
-    body {
+    * {
+      box-sizing: border-box;
+    }
+    html, body {
       margin: 0;
       padding: 0;
+      width: 100%;
+      height: 100%;
       background: radial-gradient(circle at center, #1e1b4b 0%, #09090b 100%);
       color: #f8fafc;
       font-family: 'Montserrat', sans-serif;
       user-select: none;
       -webkit-user-select: none;
-      overflow-x: hidden;
+      overflow: hidden;
     }
     .loud-font {
       font-family: 'Bangers', cursive;
       letter-spacing: 1.5px;
     }
-    .comic-panel {
+    .cartoon-bar {
       background: linear-gradient(180deg, #18181b 0%, #09090b 100%);
-      border: 3px solid #f59e0b;
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      border-bottom: 3px solid #fbbf24;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.8);
     }
     .comic-btn {
-      border: 2px solid #09090b;
-      box-shadow: 3px 3px 0px #09090b;
+      border: 2.5px solid #09090b;
+      box-shadow: 2px 3px 0px #09090b;
       transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.12s ease;
     }
     .comic-btn:hover {
       transform: translate(-1px, -1px);
-      box-shadow: 4px 4px 0px #09090b;
+      box-shadow: 3px 4px 0px #09090b;
       filter: brightness(1.08);
     }
     .comic-btn:active {
-      transform: translate(2px, 2px);
+      transform: translate(1px, 2px);
       box-shadow: 1px 1px 0px #09090b;
     }
+    #stageWrap {
+      width: 100vw;
+      height: calc(100vh - 52px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 10px;
+      position: relative;
+    }
     canvas {
+      width: min(100%, calc((100vh - 66px) * (16 / 9)));
+      height: min(calc(100vh - 66px), calc(100vw * (9 / 16)));
       border: 4px solid #fbbf24;
-      box-shadow: 0 15px 45px rgba(0, 0, 0, 0.9), 0 0 25px rgba(245, 158, 11, 0.25);
-      border-radius: 14px;
+      box-shadow: 0 14px 45px rgba(0, 0, 0, 0.92), 0 0 28px rgba(251, 191, 36, 0.22);
+      border-radius: 16px;
       background: #09090b;
       cursor: pointer;
+      display: block;
     }
   </style>
 </head>
-<body class="flex flex-col items-center justify-center min-h-screen p-2 sm:p-4">
+<body class="flex flex-col">
 
-  <!-- BARRA SUPERIOR CON REPRODUCTOR DE AIRBAG Y MP3 POR DEFECTO DEL SITIO -->
-  <header class="w-full max-w-6xl comic-panel rounded-2xl p-2.5 mb-2.5 flex flex-wrap items-center justify-between gap-2">
-    <div class="flex items-center gap-3">
-      <div class="bg-gradient-to-b from-red-500 to-red-700 text-white loud-font text-2xl sm:text-3xl px-4 py-0.5 rounded-lg border-2 border-amber-300 shadow-[3px_3px_0px_#000] -rotate-1">
+  <!-- BARRA SUPERIOR COMPACTA TODO-EN-UNO (SIN SÁNDWICH INFERIOR) -->
+  <header class="w-full h-[52px] cartoon-bar px-3 flex items-center justify-between gap-2 z-20 shrink-0">
+    <!-- Logo y Título -->
+    <div class="flex items-center gap-2.5 min-w-0">
+      <div class="bg-gradient-to-b from-red-500 to-red-700 text-white loud-font text-xl sm:text-2xl px-3 py-0.5 rounded-lg border-2 border-amber-300 shadow-[2px_2px_0px_#000] -rotate-2 shrink-0">
         AIRBAG
       </div>
-      <div>
-        <h1 class="loud-font text-xl sm:text-2xl text-amber-400 tracking-wider leading-none drop-shadow-[2px_2px_0px_#000]">
-          EL RESCATE DE PILI • EDICIÓN HD CEL-SHADED
-        </h1>
-        <p class="text-[11px] text-slate-300 font-bold">Pato (Les Paul + Mic) vs. Guido (Recital) &amp; Gastón (Bulls #31)</p>
+      <div class="truncate">
+        <span class="loud-font text-lg sm:text-xl text-amber-400 tracking-wider drop-shadow-[2px_2px_0px_#000]">
+          EL RESCATE DE PILI
+        </span>
+        <span class="hidden xl:inline-block text-[11px] text-slate-300 font-bold ml-2">
+          • Cartoon Edition
+        </span>
       </div>
     </div>
 
-    <!-- Reproductor con MP3 del Sitio por defecto + Volumen + Selector -->
-    <div class="flex flex-wrap items-center gap-2 bg-zinc-900/90 px-3 py-1.5 rounded-xl border-2 border-zinc-700">
-      <span class="text-xs text-amber-400 font-extrabold">🎸 MÚSICA:</span>
-      <select id="songSelector" class="bg-zinc-800 text-white text-xs font-bold px-2.5 py-1 rounded-lg border border-amber-500/60 focus:outline-none cursor-pointer">
-        <option value="hosted_mp3" selected>💿 MP3 del Sitio (Por Defecto)</option>
-        <option value="por_mil_noches">🎵 Por Mil Noches (Rock Synth)</option>
-        <option value="cae_el_sol">🎵 Cae el Sol (Rock Synth)</option>
-        <option value="solo_aqui">🎵 Solo Aquí (Rock Synth)</option>
-        <option value="huracan">🎵 Huracán (Riff Pesado)</option>
+    <!-- Atajos de Nivel + Controles Modal -->
+    <div class="hidden md:flex items-center gap-1.5">
+      <button id="btnStage1" class="comic-btn bg-amber-400 text-black text-[11px] font-extrabold px-2.5 py-1 rounded-lg cursor-pointer">
+        🎹 NIVEL 1: GUIDO
+      </button>
+      <button id="btnStage2" class="comic-btn bg-red-600 text-white text-[11px] font-extrabold px-2.5 py-1 rounded-lg cursor-pointer">
+        🏀 NIVEL 2: GASTÓN
+      </button>
+      <button id="btnBossNow" class="comic-btn bg-cyan-400 text-black text-[11px] font-extrabold px-2.5 py-1 rounded-lg cursor-pointer">
+        ⚡ IR AL JEFE
+      </button>
+      <button id="btnHelpToggle" class="comic-btn bg-violet-500 text-white text-[11px] font-extrabold px-2.5 py-1 rounded-lg cursor-pointer" title="Ver Controles">
+        🎮 CONTROLES
+      </button>
+    </div>
+
+    <!-- Reproductor MP3 Integrado -->
+    <div class="flex items-center gap-1.5 bg-zinc-900/95 px-2.5 py-1 rounded-xl border border-zinc-700 shrink-0">
+      <select id="songSelector" class="bg-zinc-800 text-white text-[11px] font-bold px-2 py-1 rounded-lg border border-amber-500/60 focus:outline-none cursor-pointer">
+        <option value="hosted_mp3" selected>💿 Airbag MP3 (Original)</option>
+        <option value="por_mil_noches">🎵 Por Mil Noches (Synth)</option>
+        <option value="cae_el_sol">🎵 Cae el Sol (Synth)</option>
+        <option value="solo_aqui">🎵 Solo Aquí (Synth)</option>
+        <option value="huracan">🎵 Huracán (Synth)</option>
       </select>
 
-      <button id="playPauseMusicBtn" class="comic-btn bg-emerald-500 text-black font-black text-xs px-2.5 py-1 rounded-lg cursor-pointer">
-        🔊 MÚSICA ON
+      <button id="playPauseMusicBtn" class="comic-btn bg-emerald-500 text-black font-black text-[11px] px-2 py-1 rounded-lg cursor-pointer">
+        🔊 ON
       </button>
 
-      <div class="flex items-center gap-1 bg-zinc-800 px-2 py-1 rounded-lg border border-zinc-600" title="Volumen de Música">
-        <span class="text-[10px] text-amber-300 font-bold">VOL</span>
-        <input id="volumeSlider" type="range" min="0" max="1" step="0.05" value="0.85" class="w-14 accent-amber-400 cursor-pointer">
+      <div class="hidden sm:flex items-center gap-1 bg-zinc-800 px-2 py-0.5 rounded-lg border border-zinc-600" title="Volumen">
+        <span class="text-[9px] text-amber-300 font-bold">VOL</span>
+        <input id="volumeSlider" type="range" min="0" max="1" step="0.05" value="0.85" class="w-12 accent-amber-400 cursor-pointer">
       </div>
 
-      <!-- Botón opcional para elegir o cambiar archivo MP3 local -->
-      <label class="comic-btn bg-gradient-to-r from-pink-500 to-rose-600 text-white font-black text-xs px-2.5 py-1 rounded-lg cursor-pointer flex items-center gap-1">
-        <span>📂 Cambiar MP3</span>
+      <label class="comic-btn bg-gradient-to-r from-pink-500 to-rose-600 text-white font-black text-[11px] px-2 py-1 rounded-lg cursor-pointer flex items-center gap-1" title="Cargar otro MP3">
+        <span>📂 MP3</span>
         <input type="file" id="mp3Uploader" accept="audio/*" multiple class="hidden">
       </label>
-      <span id="customTrackName" class="text-[11px] text-amber-300 font-extrabold max-w-[175px] truncate">💿 Buscando MP3...</span>
+      <span id="customTrackName" class="hidden lg:inline-block text-[10px] text-amber-300 font-extrabold max-w-[130px] truncate">💿 airbag.mp3</span>
     </div>
   </header>
 
-  <!-- LIENZO PRINCIPAL DEL JUEGO (1280x720 HD CEL-SHADED) -->
-  <main class="relative w-full max-w-6xl flex flex-col items-center">
-    <div class="relative w-full flex justify-center">
-      <canvas id="gameCanvas" width="1280" height="720" class="w-full h-auto max-h-[75vh] block"></canvas>
-    </div>
+  <!-- ÁREA JUGABLE PANTALLA COMPLETA SIN BARRA INFERIOR -->
+  <main id="stageWrap">
+    <canvas id="gameCanvas" width="1280" height="720"></canvas>
 
-    <!-- Panel Inferior de Controles y Atajos de Nivel -->
-    <div class="w-full mt-2.5 comic-panel rounded-2xl p-2.5 flex flex-wrap items-center justify-between gap-2 text-xs">
-      <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
-        <span class="loud-font text-lg text-amber-400 mr-1">CONTROLES:</span>
-        <span class="bg-zinc-800 px-2.5 py-1 rounded-lg border border-zinc-600 font-bold text-slate-200">FLECHAS / WASD: Mover</span>
-        <span class="bg-zinc-800 px-2.5 py-1 rounded-lg border border-zinc-600 font-bold text-emerald-300">ESPACIO: Saltar</span>
-        <span class="bg-amber-400/20 px-2.5 py-1 rounded-lg border border-amber-400 font-bold text-amber-300">TECLA J: Les Paul (DO, SOL, 𝄞)</span>
-        <span class="bg-fuchsia-500/20 px-2.5 py-1 rounded-lg border border-fuchsia-400 font-bold text-fuchsia-300">TECLA K: Micrófono de Pie</span>
-        <span class="bg-cyan-500/20 px-2.5 py-1 rounded-lg border border-cyan-400 font-bold text-cyan-300">J+K o L: Super Acople 360°</span>
-      </div>
-      <div class="flex items-center gap-2">
-        <button id="btnStage1" class="comic-btn bg-amber-500 text-black text-xs font-extrabold px-2.5 py-1 rounded-lg cursor-pointer">
-          🎹 NIVEL 1 (GUIDO)
-        </button>
-        <button id="btnStage2" class="comic-btn bg-red-600 text-white text-xs font-extrabold px-2.5 py-1 rounded-lg cursor-pointer">
-          🏀 NIVEL 2 (GASTÓN Y PILI)
-        </button>
-        <button id="btnBossNow" class="comic-btn bg-cyan-400 text-black text-xs font-extrabold px-2.5 py-1 rounded-lg cursor-pointer">
-          ⚡ IR AL JEFE
-        </button>
-      </div>
-    </div>
-
-    <!-- Controles Táctiles en Pantalla -->
-    <div class="w-full mt-2.5 grid grid-cols-2 gap-3 lg:hidden">
-      <div class="flex items-center gap-2">
-        <button id="tLeft" class="comic-btn w-12 h-12 bg-zinc-800 text-white font-black rounded-xl text-lg">◀</button>
-        <div class="flex flex-col gap-1">
-          <button id="tUp" class="comic-btn w-12 h-10 bg-zinc-800 text-white font-black rounded-xl text-sm">▲</button>
-          <button id="tDown" class="comic-btn w-12 h-10 bg-zinc-800 text-white font-black rounded-xl text-sm">▼</button>
+    <!-- TARJETA FLOTANTE DE CONTROLES (SE ABRE CON EL BOTÓN 🎮 CONTROLES O TECLA H) -->
+    <div id="controlsOverlay" class="hidden absolute top-4 left-1/2 -translate-x-1/2 z-30 bg-zinc-950/95 border-4 border-amber-400 rounded-2xl p-4 shadow-2xl max-w-lg w-[92vw] text-center">
+      <h2 class="loud-font text-3xl text-amber-400 mb-2">🎮 CONTROLES DE ESCENARIO</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-left font-bold mb-3">
+        <div class="bg-zinc-900 p-2.5 rounded-xl border border-zinc-700">
+          <span class="text-amber-400">⬅️➡️⬆️⬇️ / WASD:</span> Mover a Pato
         </div>
-        <button id="tRight" class="comic-btn w-12 h-12 bg-zinc-800 text-white font-black rounded-xl text-lg">▶</button>
+        <div class="bg-zinc-900 p-2.5 rounded-xl border border-zinc-700">
+          <span class="text-emerald-400">ESPACIO:</span> Saltar
+        </div>
+        <div class="bg-zinc-900 p-2.5 rounded-xl border border-zinc-700">
+          <span class="text-amber-300">TECLA J (o Z):</span> Guitarra Gibson Les Paul
+        </div>
+        <div class="bg-zinc-900 p-2.5 rounded-xl border border-zinc-700">
+          <span class="text-fuchsia-400">TECLA K (o X):</span> Barrido con Micrófono
+        </div>
+        <div class="bg-zinc-900 p-2.5 rounded-xl border border-zinc-700 sm:col-span-2">
+          <span class="text-cyan-400">TECLA L (o J+K juntos):</span> ¡Super Acople Sónico 360°!
+        </div>
+      </div>
+      <button id="closeHelpBtn" class="comic-btn bg-amber-400 text-black font-black text-xs px-5 py-2 rounded-xl cursor-pointer">
+        ¡LISTO, A ROCKEAR! (ESC)
+      </button>
+    </div>
+
+    <!-- CONTROLES TÁCTILES FLOTANTES (SOLO EN MÓVILES / TABLETS) -->
+    <div class="fixed bottom-3 left-3 right-3 flex items-center justify-between pointer-events-none lg:hidden z-20">
+      <div class="flex items-center gap-1.5 pointer-events-auto opacity-85">
+        <button id="tLeft" class="comic-btn w-12 h-12 bg-zinc-900/90 text-white font-black rounded-xl text-lg">◀</button>
+        <div class="flex flex-col gap-1">
+          <button id="tUp" class="comic-btn w-12 h-10 bg-zinc-900/90 text-white font-black rounded-xl text-sm">▲</button>
+          <button id="tDown" class="comic-btn w-12 h-10 bg-zinc-900/90 text-white font-black rounded-xl text-sm">▼</button>
+        </div>
+        <button id="tRight" class="comic-btn w-12 h-12 bg-zinc-900/90 text-white font-black rounded-xl text-lg">▶</button>
         <button id="tJump" class="comic-btn px-3 h-12 bg-emerald-500 text-black font-black rounded-xl text-xs">SALTAR</button>
       </div>
-      <div class="flex items-center justify-end gap-2">
+      <div class="flex items-center gap-1.5 pointer-events-auto opacity-85">
         <button id="tGuitar" class="comic-btn px-3 h-12 bg-amber-400 text-black font-black rounded-xl text-xs flex flex-col items-center justify-center">
           <span>🎸 J</span>
           <span class="text-[9px]">LES PAUL</span>
         </button>
         <button id="tMic" class="comic-btn px-3 h-12 bg-fuchsia-400 text-black font-black rounded-xl text-xs flex flex-col items-center justify-center">
           <span>🎤 K</span>
-          <span class="text-[9px]">MICRÓFONO</span>
+          <span class="text-[9px]">MIC</span>
         </button>
         <button id="tSpecial" class="comic-btn px-3 h-12 bg-cyan-400 text-black font-black rounded-xl text-xs flex flex-col items-center justify-center">
           <span>⚡ L</span>
@@ -218,7 +252,6 @@
         const label = document.getElementById('customTrackName');
         if (label) {
           label.textContent = text;
-          label.classList.remove('hidden');
         }
       }
 
@@ -300,7 +333,7 @@
           if (this.currentSong === 'hosted_mp3') {
             this.mp3Ready = false;
             this.usingCustomMP3 = false;
-            this.updateTrackBadge('🎸 Synth Activo (Subí ' + DEFAULT_MP3_FILE + ')');
+            this.updateTrackBadge('🎸 Synth Activo');
           }
         };
 
@@ -316,7 +349,7 @@
         if (!isUnverifiedFallback) {
           this.updateTrackBadge('💿 ' + displayName);
         } else {
-          this.updateTrackBadge('💿 ' + displayName + ' (Por Defecto)');
+          this.updateTrackBadge('💿 ' + displayName);
         }
 
         if (this.isPlaying && this.usingCustomMP3) {
@@ -357,7 +390,7 @@
         } else {
           this.audioEl.pause();
           this.usingCustomMP3 = false;
-          this.updateTrackBadge('🎸 Synth: ' + key.replace(/_/g, ' '));
+          this.updateTrackBadge('🎸 ' + key.replace(/_/g, ' '));
           this.startLoop();
         }
       }
@@ -383,12 +416,12 @@
         this.isPlaying = !this.isPlaying;
         const btn = document.getElementById('playPauseMusicBtn');
         if (this.isPlaying) {
-          btn.textContent = '🔊 MÚSICA ON';
-          btn.className = 'comic-btn bg-emerald-500 text-black font-black text-xs px-2.5 py-1 rounded-lg cursor-pointer';
+          btn.textContent = '🔊 ON';
+          btn.className = 'comic-btn bg-emerald-500 text-black font-black text-[11px] px-2 py-1 rounded-lg cursor-pointer';
           if (this.usingCustomMP3) this.audioEl.play().catch(() => {});
         } else {
-          btn.textContent = '🔇 MÚSICA OFF';
-          btn.className = 'comic-btn bg-zinc-600 text-white font-black text-xs px-2.5 py-1 rounded-lg cursor-pointer';
+          btn.textContent = '🔇 OFF';
+          btn.className = 'comic-btn bg-zinc-600 text-white font-black text-[11px] px-2 py-1 rounded-lg cursor-pointer';
           if (this.usingCustomMP3) this.audioEl.pause();
         }
       }
@@ -484,234 +517,311 @@
 
     const W = 1280;
     const H = 720;
-    const FLOOR_TOP = 470;
-    const FLOOR_BOTTOM = 690;
+    // Área jugable ampliada para que los personajes grandes tengan mucho espacio
+    const FLOOR_TOP = 420;
+    const FLOOR_BOTTOM = 696;
+    const CHAR_SCALE = 1.48; // Escala cartoon grande estilo The Loud House
 
-    function drawRealisticComicHead(ctx, opts = {}) {
+    // ============================================================================
+    // CABEZA CARTOON ESTILO "THE LOUD HOUSE" (OJOS GRANDES UNIDOS, NARIZ REDONDA,
+    // BOCA EXPRESIVA CON DIENTES Y LENGUA, TRAZOS GRUESOS DE TINTA)
+    // ============================================================================
+    function drawLoudCartoonHead(ctx, opts = {}) {
       const {
-        skinBase = '#f6cba3',
-        skinShadow = '#dca273',
+        skinBase = '#fbd3b0',
+        skinShadow = '#e6ad82',
         hasBeard = false,
         beardStyle = 'pato',
         sunglasses = false,
         mouthOpen = false,
         smile = true,
         eyebrowSlit = false,
-        isChild = false
+        isChild = false,
+        eyeColor = '#2b1b12',
+        freckles = false
       } = opts;
 
       ctx.save();
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
+      const ink = '#141117';
 
+      // Cuello cartoon
       if (!isChild) {
         ctx.fillStyle = skinShadow;
-        ctx.strokeStyle = '#09090b';
-        ctx.lineWidth = 3;
+        ctx.strokeStyle = ink;
+        ctx.lineWidth = 3.4;
         ctx.beginPath();
-        ctx.roundRect(-10, 12, 18, 18, 4);
+        ctx.roundRect(-9, 14, 16, 16, 5);
         ctx.fill();
         ctx.stroke();
       }
 
-      const headGrad = ctx.createLinearGradient(-20, -32, 22, 24);
-      headGrad.addColorStop(0, '#ffe0c2');
-      headGrad.addColorStop(0.6, skinBase);
+      // Oreja trasera / lateral estilo Loud House (redonda con línea interna en C)
+      ctx.fillStyle = skinBase;
+      ctx.strokeStyle = ink;
+      ctx.lineWidth = 3.4;
+      ctx.beginPath();
+      ctx.arc(-25, 0, isChild ? 7.5 : 8.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.strokeStyle = '#c48257';
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.arc(-25, 0, 4, Math.PI * 0.4, Math.PI * 1.6);
+      ctx.stroke();
+
+      if (!isChild) {
+        // Aro rockero plateado
+        ctx.strokeStyle = '#f8fafc';
+        ctx.lineWidth = 2.4;
+        ctx.beginPath();
+        ctx.arc(-26, 7.5, 3.5, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      // Silueta de cabeza ancha y expresiva estilo The Loud House (mejillas redondeadas)
+      const headGrad = ctx.createLinearGradient(-24, -34, 24, 26);
+      headGrad.addColorStop(0, '#ffe4ca');
+      headGrad.addColorStop(0.65, skinBase);
       headGrad.addColorStop(1, skinShadow);
 
       ctx.fillStyle = headGrad;
-      ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 3.2;
+      ctx.strokeStyle = ink;
+      ctx.lineWidth = 3.6;
 
       ctx.beginPath();
       if (isChild) {
-        ctx.moveTo(-20, -22);
-        ctx.bezierCurveTo(-23, -2, -20, 16, 0, 20);
-        ctx.bezierCurveTo(20, 16, 23, -2, 20, -22);
-        ctx.bezierCurveTo(14, -34, -14, -34, -20, -22);
+        // Cabeza infantil bien redonda tipo Lola / Lana / Lucy
+        ctx.moveTo(-24, -18);
+        ctx.bezierCurveTo(-29, 4, -22, 23, 0, 23);
+        ctx.bezierCurveTo(24, 23, 29, 4, 23, -18);
+        ctx.bezierCurveTo(17, -36, -17, -36, -24, -18);
       } else {
-        ctx.moveTo(-21, -26);
-        ctx.lineTo(-22, -4);
-        ctx.quadraticCurveTo(-21, 14, -8, 22);
-        ctx.lineTo(6, 23);
-        ctx.quadraticCurveTo(20, 16, 22, 0);
-        ctx.lineTo(21, -24);
-        ctx.bezierCurveTo(15, -36, -15, -36, -21, -26);
+        // Cabeza cartoon joven/adulto con mejilla marcada tipo Lincoln / Luna / Leni
+        ctx.moveTo(-24, -24);
+        ctx.bezierCurveTo(-27, -4, -26, 16, -8, 24);
+        ctx.quadraticCurveTo(6, 26, 18, 20);
+        ctx.bezierCurveTo(28, 13, 27, -4, 23, -24);
+        ctx.bezierCurveTo(16, -38, -16, -38, -24, -24);
       }
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
 
-      ctx.fillStyle = 'rgba(180, 105, 60, 0.28)';
+      // Rubor cálido de mejilla estilo cartoon moderno
+      ctx.fillStyle = 'rgba(244, 114, 182, 0.22)';
       ctx.beginPath();
-      ctx.moveTo(-20, -20);
-      ctx.quadraticCurveTo(-12, 5, 4, 21);
-      ctx.lineTo(-8, 21);
-      ctx.quadraticCurveTo(-20, 12, -21, -4);
-      ctx.closePath();
+      ctx.ellipse(-12, 5, 6.5, 4, 0, 0, Math.PI * 2);
+      ctx.ellipse(17, 5, 5.5, 3.5, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      ctx.fillStyle = skinBase;
-      ctx.beginPath();
-      ctx.ellipse(-22, -2, 5.5, 9, -0.1, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-      if (!isChild) {
-        ctx.strokeStyle = '#e2e8f0';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(-23, 6, 3.5, 0, Math.PI * 2);
-        ctx.stroke();
-      }
-
+      // Barba corta estilizada cartoon (para Pato y Guido)
       if (hasBeard) {
-        ctx.fillStyle = beardStyle === 'pato' ? 'rgba(92, 64, 40, 0.48)' : 'rgba(70, 50, 35, 0.55)';
+        ctx.fillStyle = beardStyle === 'pato' ? 'rgba(92, 62, 38, 0.42)' : 'rgba(68, 48, 32, 0.48)';
         ctx.beginPath();
-        ctx.moveTo(-19, 0);
-        ctx.quadraticCurveTo(-17, 16, -6, 22);
-        ctx.lineTo(6, 22);
-        ctx.quadraticCurveTo(19, 15, 20, 1);
-        ctx.quadraticCurveTo(14, 12, 2, 13);
-        ctx.quadraticCurveTo(-12, 12, -19, 0);
-        ctx.fill();
-
-        ctx.strokeStyle = '#3f2e21';
-        ctx.lineWidth = 2.8;
-        ctx.beginPath();
-        ctx.moveTo(-7, 6);
-        ctx.quadraticCurveTo(2, 3, 12, 6);
-        ctx.stroke();
-
-        ctx.fillStyle = '#3f2e21';
-        ctx.beginPath();
-        ctx.moveTo(-3, 13);
-        ctx.lineTo(6, 13);
-        ctx.lineTo(3, 21);
-        ctx.lineTo(-1, 21);
+        ctx.moveTo(-22, 2);
+        ctx.bezierCurveTo(-21, 18, -8, 24, 5, 24);
+        ctx.bezierCurveTo(19, 23, 25, 13, 24, 2);
+        ctx.quadraticCurveTo(16, 11, 3, 11);
+        ctx.quadraticCurveTo(-12, 11, -22, 2);
         ctx.closePath();
         ctx.fill();
+
+        // Candado / bigote cartoon definido
+        ctx.fillStyle = '#3b2819';
+        ctx.beginPath();
+        ctx.roundRect(-8, 4, 22, 4.2, 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.roundRect(-1, 17, 8, 5.5, 2.5);
+        ctx.fill();
       }
 
-      ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 2.5;
+      // BOCA GRANDE EXPRESIVA ESTILO "THE LOUD HOUSE" (dientes blancos arriba + lengua rosa)
+      ctx.strokeStyle = ink;
+      ctx.lineWidth = 3;
       if (mouthOpen) {
-        ctx.fillStyle = '#450a0a';
+        // Boca abierta cantando / gritando rock
+        ctx.fillStyle = '#580c1f';
         ctx.beginPath();
-        ctx.roundRect(-5, 7, 15, 9, 4);
+        ctx.moveTo(-10, 7);
+        ctx.quadraticCurveTo(4, 5, 16, 7);
+        ctx.bezierCurveTo(19, 18, 10, 22, 2, 22);
+        ctx.bezierCurveTo(-8, 22, -13, 16, -10, 7);
+        ctx.closePath();
         ctx.fill();
         ctx.stroke();
+
+        // Fila superior de dientes blancos
         ctx.fillStyle = '#ffffff';
-        ctx.fillRect(-3, 7, 11, 3);
-        ctx.fillStyle = '#f43f5e';
         ctx.beginPath();
-        ctx.arc(2, 14, 4, Math.PI, 0);
+        ctx.moveTo(-9, 7.5);
+        ctx.quadraticCurveTo(4, 6, 15, 7.5);
+        ctx.lineTo(14, 12);
+        ctx.quadraticCurveTo(3, 11, -8, 12);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Lengua rosada cartoon
+        ctx.fillStyle = '#fb7185';
+        ctx.beginPath();
+        ctx.ellipse(3, 18.5, 7.5, 3.6, 0, Math.PI, Math.PI * 2);
         ctx.fill();
       } else if (smile) {
+        // Sonrisa ancha blanca clásica de The Loud House
         ctx.fillStyle = '#ffffff';
         ctx.beginPath();
-        ctx.moveTo(-6, 7);
-        ctx.quadraticCurveTo(3, 9, 12, 6);
-        ctx.quadraticCurveTo(10, 14, -4, 12);
+        ctx.moveTo(-10, 7.5);
+        ctx.quadraticCurveTo(3, 10, 16, 6.5);
+        ctx.bezierCurveTo(15, 18, -6, 18, -10, 7.5);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
+
+        // Línea divisoria de dientes
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.moveTo(-6, 12.5);
+        ctx.quadraticCurveTo(3, 14, 12, 11.5);
+        ctx.stroke();
       } else {
         ctx.beginPath();
-        ctx.moveTo(-4, 10);
-        ctx.quadraticCurveTo(3, 8, 10, 10);
+        ctx.moveTo(-6, 13);
+        ctx.quadraticCurveTo(3, 10, 12, 13);
         ctx.stroke();
       }
 
+      // OJOS GRANDES OVALADOS UNIDOS ESTILO "THE LOUD HOUSE"
+      // En The Loud House los dos ojos son grandes óvalos blancos contiguos en el centro
+      const eyeRX = isChild ? 8.2 : 7.6;
+      const eyeRY = isChild ? 10.2 : 9.4;
+
+      // Ojo izquierdo y derecho unidos
+      for (const [ex, tilt] of [[-4.5, -0.06], [8.8, 0.06]]) {
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = ink;
+        ctx.lineWidth = 3.1;
+        ctx.beginPath();
+        ctx.ellipse(ex, -8, eyeRX, eyeRY, tilt, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Pupila grande cartoon con brillo blanco (pie-eye / catchlight)
+        ctx.fillStyle = eyeColor;
+        ctx.beginPath();
+        ctx.ellipse(ex + 1.4, -7.5, isChild ? 4.2 : 3.6, isChild ? 5.0 : 4.3, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#09090b';
+        ctx.beginPath();
+        ctx.arc(ex + 1.6, -7.5, isChild ? 2.3 : 2.0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Brillo blanco cartoon grande
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(ex + 0.2, -10.2, 1.8, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Pestañas si es niña (Pili)
+      if (isChild) {
+        ctx.strokeStyle = ink;
+        ctx.lineWidth = 2.6;
+        ctx.beginPath();
+        ctx.moveTo(-12, -14); ctx.lineTo(-15, -17);
+        ctx.moveTo(-10, -16); ctx.lineTo(-12, -20);
+        ctx.moveTo(15, -14); ctx.lineTo(18, -17);
+        ctx.moveTo(13, -16); ctx.lineTo(15, -20);
+        ctx.stroke();
+      }
+
+      // Lentes de sol rockeros (para Pato) encima de los ojos pero dejando ver actitud cartoon
+      if (sunglasses) {
+        ctx.fillStyle = '#09090b';
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 3.2;
+        ctx.beginPath();
+        ctx.roundRect(-16, -15, 18, 12.5, 3);
+        ctx.roundRect(4, -15, 18, 12.5, 3);
+        ctx.fill();
+        ctx.stroke();
+
+        // Puente y patilla
+        ctx.lineWidth = 3.5;
+        ctx.beginPath();
+        ctx.moveTo(-24, -10);
+        ctx.lineTo(22, -10);
+        ctx.stroke();
+
+        // Reflejos blancos cartoon en los cristales
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+        ctx.lineWidth = 2.6;
+        ctx.beginPath();
+        ctx.moveTo(-12, -12.5); ctx.lineTo(-6, -5.5);
+        ctx.moveTo(8, -12.5); ctx.lineTo(14, -5.5);
+        ctx.stroke();
+      }
+
+      // NARIZ REDONDA CARTOON ESTILO "THE LOUD HOUSE" (ubicada justo entre/debajo de los ojos)
       ctx.fillStyle = skinShadow;
+      ctx.strokeStyle = ink;
+      ctx.lineWidth = 3.0;
       ctx.beginPath();
-      ctx.moveTo(4, -10);
-      ctx.lineTo(10, -1);
-      ctx.lineTo(3, 1);
-      ctx.closePath();
+      ctx.moveTo(2, -4);
+      ctx.bezierCurveTo(12, -5, 13, 3.5, 2, 3.5);
       ctx.fill();
-      ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 2.4;
-      ctx.beginPath();
-      ctx.moveTo(4, -10);
-      ctx.lineTo(10, -1);
-      ctx.lineTo(4, 1);
       ctx.stroke();
 
+      if (freckles) {
+        ctx.fillStyle = '#b4693c';
+        [[-11, 2], [-8, 4], [-13, 4], [15, 2], [17, 4]].forEach(([fx, fy]) => {
+          ctx.beginPath();
+          ctx.arc(fx, fy, 1.1, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
+
+      // CEJAS EXPRESIVAS FLOTANTES ESTILO "THE LOUD HOUSE"
       ctx.strokeStyle = '#271c15';
-      ctx.lineWidth = 3;
+      ctx.lineWidth = 3.8;
       ctx.beginPath();
-      ctx.moveTo(-14, -14); ctx.lineTo(-1, -12);
-      ctx.moveTo(6, -12); ctx.lineTo(18, -14);
+      ctx.moveTo(-15, -20);
+      ctx.quadraticCurveTo(-6, -24, 0, -19);
+      ctx.moveTo(5, -19);
+      ctx.quadraticCurveTo(13, -24, 20, -19);
       ctx.stroke();
 
       if (eyebrowSlit) {
         ctx.strokeStyle = skinBase;
-        ctx.lineWidth = 2.2;
-        ctx.beginPath();
-        ctx.moveTo(13, -16); ctx.lineTo(14, -10);
-        ctx.stroke();
-      }
-
-      if (sunglasses) {
-        ctx.fillStyle = '#09090b';
-        ctx.strokeStyle = '#000000';
         ctx.lineWidth = 2.6;
         ctx.beginPath();
-        ctx.roundRect(-15, -11, 16, 9, 2);
-        ctx.roundRect(4, -11, 16, 9, 2);
-        ctx.fill();
+        ctx.moveTo(15, -24);
+        ctx.lineTo(16, -17);
         ctx.stroke();
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(-22, -8); ctx.lineTo(20, -8);
-        ctx.stroke();
-        ctx.strokeStyle = 'rgba(255,255,255,0.85)';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(-11, -9); ctx.lineTo(-6, -4);
-        ctx.moveTo(8, -9); ctx.lineTo(13, -4);
-        ctx.stroke();
-      } else {
-        for (let ox of [-7, 11]) {
-          ctx.fillStyle = '#ffffff';
-          ctx.strokeStyle = '#09090b';
-          ctx.lineWidth = 2.2;
-          ctx.beginPath();
-          ctx.ellipse(ox, -6, isChild ? 5.5 : 4.8, isChild ? 6.5 : 4.2, 0, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.stroke();
-
-          ctx.fillStyle = isChild ? '#5c3820' : '#3b2818';
-          ctx.beginPath();
-          ctx.arc(ox + 1, -6, isChild ? 3.2 : 2.5, 0, Math.PI * 2);
-          ctx.fill();
-
-          ctx.fillStyle = '#09090b';
-          ctx.beginPath();
-          ctx.arc(ox + 1, -6, 1.4, 0, Math.PI * 2);
-          ctx.fill();
-
-          ctx.fillStyle = '#ffffff';
-          ctx.beginPath();
-          ctx.arc(ox, -7.5, 1.3, 0, Math.PI * 2);
-          ctx.fill();
-        }
       }
 
       ctx.restore();
     }
 
+    // ============================================================================
+    // 1. PATO SARDELLI (PROTAGONISTA - ESCALA GRANDE CARTOON LOUD HOUSE)
+    // ============================================================================
     function drawPatoHD(p) {
       ctx.save();
       ctx.translate(p.x, p.y);
+      ctx.scale(CHAR_SCALE, CHAR_SCALE);
 
-      const shScale = Math.max(0.4, 1 - p.z / 220);
+      const shScale = Math.max(0.4, 1 - p.z / 240);
       ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
       ctx.beginPath();
-      ctx.ellipse(0, 0, 42 * shScale, 13 * shScale, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, 0, 44 * shScale, 13 * shScale, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      ctx.translate(0, -p.z);
+      ctx.translate(0, -p.z / CHAR_SCALE);
 
       if (p.invuln > 0 && Math.floor(p.invuln / 3) % 2 === 0) {
         ctx.globalAlpha = 0.55;
@@ -720,23 +830,24 @@
       if (!p.facingRight) ctx.scale(-1, 1);
 
       const isMoving = Math.abs(p.vx) > 0.1 || Math.abs(p.vy) > 0.1;
-      const walkSwing = isMoving ? Math.sin(p.walkCycle * 0.36) * 20 : 0;
+      const walkSwing = isMoving ? Math.sin(p.walkCycle * 0.36) * 22 : 0;
       const bounce = isMoving ? Math.abs(Math.sin(p.walkCycle * 0.36)) * 4.5 : Math.sin(Date.now() * 0.005) * 2;
 
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
 
+      // Micrófono de pie cromado cruzado en la espalda (o en mano al atacar con K)
       ctx.save();
       if (p.micSwingAnim > 0) {
-        ctx.translate(32, -78);
+        ctx.translate(34, -76);
         ctx.rotate((16 - p.micSwingAnim) * 0.13 - 0.45);
       } else {
-        ctx.translate(-18, -82 - bounce);
+        ctx.translate(-18, -80 - bounce);
         ctx.rotate(-0.55);
       }
       ctx.fillStyle = '#1e293b';
       ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 3;
+      ctx.lineWidth = 3.2;
       ctx.beginPath();
       ctx.ellipse(0, 62, 16, 6, 0, 0, Math.PI * 2);
       ctx.fill();
@@ -752,138 +863,102 @@
 
       ctx.fillStyle = '#cbd5e1';
       ctx.beginPath();
-      ctx.arc(0, -74, 9, 0, Math.PI * 2);
+      ctx.arc(0, -74, 9.5, 0, Math.PI * 2);
       ctx.fill();
-      ctx.stroke();
-      ctx.strokeStyle = '#475569';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(-7, -74); ctx.lineTo(7, -74);
       ctx.stroke();
       ctx.restore();
 
       ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 3.2;
+      ctx.lineWidth = 3.4;
 
+      // Pierna izquierda
       ctx.save();
-      ctx.translate(-8, -50);
+      ctx.translate(-8, -48);
       ctx.rotate(-walkSwing * 0.028);
       ctx.fillStyle = '#18181b';
       ctx.beginPath();
-      ctx.roundRect(-7, 0, 14, 44, 5);
+      ctx.roundRect(-7, 0, 14, 42, 5);
       ctx.fill();
       ctx.stroke();
+      // Zapatilla grande cartoon tipo Converse/Vans
       ctx.fillStyle = '#09090b';
       ctx.beginPath();
-      ctx.roundRect(-7, 39, 24, 11, 4);
+      ctx.roundRect(-8, 37, 26, 12, 5);
       ctx.fill();
       ctx.stroke();
-      ctx.fillStyle = '#e2e8f0';
-      ctx.fillRect(-7, 47, 24, 3);
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(-8, 45, 26, 3.5);
       ctx.restore();
 
+      // Pierna derecha + pañuelo azul colgando
       ctx.save();
-      ctx.translate(8, -50);
+      ctx.translate(8, -48);
       ctx.rotate(walkSwing * 0.028);
       ctx.fillStyle = '#27272a';
       ctx.beginPath();
-      ctx.roundRect(-7, 0, 14, 44, 5);
+      ctx.roundRect(-7, 0, 14, 42, 5);
       ctx.fill();
-      ctx.stroke();
-      ctx.strokeStyle = '#3f3f46';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(2, 6); ctx.lineTo(2, 34);
       ctx.stroke();
 
       ctx.fillStyle = '#1d4ed8';
       ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 2.8;
+      ctx.lineWidth = 3;
       ctx.beginPath();
       ctx.moveTo(-5, 2);
-      ctx.quadraticCurveTo(-20, 18, -14, 32);
-      ctx.lineTo(-2, 26);
+      ctx.quadraticCurveTo(-20, 18, -14, 31);
+      ctx.lineTo(-2, 25);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath();
-      ctx.arc(-10, 18, 1.8, 0, Math.PI * 2);
-      ctx.arc(-8, 23, 1.4, 0, Math.PI * 2);
-      ctx.fill();
 
       ctx.fillStyle = '#09090b';
       ctx.beginPath();
-      ctx.roundRect(-7, 39, 24, 11, 4);
+      ctx.roundRect(-8, 37, 26, 12, 5);
       ctx.fill();
       ctx.stroke();
-      ctx.fillStyle = '#e2e8f0';
-      ctx.fillRect(-7, 47, 24, 3);
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(-8, 45, 26, 3.5);
       ctx.restore();
 
+      // Torso (Musculosa negra rockera + Gibson Les Paul + Cabeza Grande Cartoon)
       ctx.save();
-      ctx.translate(0, -50 - bounce);
+      ctx.translate(0, -48 - bounce);
 
+      // Brazo izquierdo sosteniendo el mástil
       ctx.save();
-      ctx.fillStyle = '#f6cba3';
+      ctx.fillStyle = '#fbd3b0';
       ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 3.2;
+      ctx.lineWidth = 3.4;
       ctx.beginPath();
-      ctx.moveTo(10, -52);
-      ctx.quadraticCurveTo(30, -48, 42, -32);
-      ctx.quadraticCurveTo(34, -20, 12, -34);
+      ctx.moveTo(10, -50);
+      ctx.quadraticCurveTo(30, -46, 42, -30);
+      ctx.quadraticCurveTo(34, -18, 12, -32);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
-      ctx.strokeStyle = 'rgba(30, 41, 59, 0.55)';
-      ctx.lineWidth = 2.2;
-      ctx.beginPath();
-      ctx.moveTo(16, -46); ctx.quadraticCurveTo(24, -44, 26, -38);
-      ctx.moveTo(19, -42); ctx.quadraticCurveTo(25, -40, 28, -35);
-      ctx.stroke();
       ctx.restore();
 
-      const shirtGrad = ctx.createLinearGradient(-18, -56, 18, 0);
+      // Musculosa negra
+      const shirtGrad = ctx.createLinearGradient(-18, -54, 18, 0);
       shirtGrad.addColorStop(0, '#27272a');
       shirtGrad.addColorStop(0.5, '#18181b');
       shirtGrad.addColorStop(1, '#09090b');
       ctx.fillStyle = shirtGrad;
       ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 3.2;
+      ctx.lineWidth = 3.4;
       ctx.beginPath();
-      ctx.moveTo(-17, -56);
-      ctx.lineTo(-9, -56);
-      ctx.quadraticCurveTo(0, -44, 9, -56);
-      ctx.lineTo(17, -56);
+      ctx.moveTo(-17, -54);
+      ctx.lineTo(-9, -54);
+      ctx.quadraticCurveTo(0, -42, 9, -54);
+      ctx.lineTo(17, -54);
       ctx.lineTo(15, 2);
       ctx.lineTo(-15, 2);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
 
-      ctx.fillStyle = '#f6cba3';
-      ctx.beginPath();
-      ctx.moveTo(-8, -56);
-      ctx.quadraticCurveTo(0, -45, 8, -56);
-      ctx.closePath();
-      ctx.fill();
-      ctx.strokeStyle = '#cbd5e1';
-      ctx.lineWidth = 1.6;
-      ctx.beginPath();
-      ctx.arc(0, -54, 7, 0.15 * Math.PI, 0.85 * Math.PI);
-      ctx.stroke();
-
-      ctx.fillStyle = '#09090b';
-      ctx.strokeStyle = '#cbd5e1';
-      ctx.lineWidth = 1.8;
-      ctx.beginPath();
-      ctx.roundRect(-17, -10, 10, 14, 2);
-      ctx.fill();
-      ctx.stroke();
-      ctx.fillStyle = '#22c55e';
-      ctx.fillRect(-14, -7, 4, 3);
-
-      const strapGrad = ctx.createLinearGradient(-8, -56, 12, -8);
+      // Correa roja de cuero con medallones "P.M.S"
+      const strapGrad = ctx.createLinearGradient(-8, -54, 12, -8);
       strapGrad.addColorStop(0, '#ef4444');
       strapGrad.addColorStop(0.5, '#dc2626');
       strapGrad.addColorStop(1, '#991b1b');
@@ -891,8 +966,8 @@
       ctx.strokeStyle = '#09090b';
       ctx.lineWidth = 2.8;
       ctx.beginPath();
-      ctx.moveTo(-6, -56);
-      ctx.lineTo(6, -56);
+      ctx.moveTo(-6, -54);
+      ctx.lineTo(6, -54);
       ctx.lineTo(14, -6);
       ctx.lineTo(2, -6);
       ctx.closePath();
@@ -904,21 +979,18 @@
       ctx.lineWidth = 1.6;
       for (let m = 0; m < 3; m++) {
         ctx.beginPath();
-        ctx.arc(1 + m * 2.5, -46 + m * 12, 3.2, 0, Math.PI * 2);
+        ctx.arc(1 + m * 2.5, -44 + m * 12, 3.2, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
       }
-      ctx.font = '900 5px "Montserrat"';
-      ctx.fillStyle = '#fef08a';
-      ctx.textAlign = 'center';
-      ctx.fillText('P.M.S', 7, -14);
 
+      // Guitarra Gibson Les Paul Cherry Sunburst
       ctx.save();
-      const strumTilt = p.guitarStrumAnim > 0 ? Math.sin(p.guitarStrumAnim * 1.6) * 0.09 : 0;
-      ctx.translate(10, -20);
-      ctx.rotate(-0.42 + strumTilt);
+      const strumTilt = p.guitarStrumAnim > 0 ? Math.sin(p.guitarStrumAnim * 1.6) * 0.1 : 0;
+      ctx.translate(10, -19);
+      ctx.rotate(-0.4 + strumTilt);
 
-      const lpGrad = ctx.createRadialGradient(-4, 2, 3, -4, 2, 25);
+      const lpGrad = ctx.createRadialGradient(-4, 2, 3, -4, 2, 26);
       lpGrad.addColorStop(0, '#fef08a');
       lpGrad.addColorStop(0.45, '#f59e0b');
       lpGrad.addColorStop(0.8, '#dc2626');
@@ -938,107 +1010,74 @@
       ctx.stroke();
 
       ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 2.5;
+      ctx.lineWidth = 2.6;
       ctx.stroke();
 
+      // Mástil y clavijero
       ctx.fillStyle = '#451a03';
       ctx.strokeStyle = '#09090b';
       ctx.lineWidth = 2.8;
       ctx.fillRect(19, -4.5, 44, 8);
       ctx.strokeRect(19, -4.5, 44, 8);
 
-      ctx.fillStyle = '#f8fafc';
-      for (let f = 23; f < 58; f += 7) {
-        ctx.fillRect(f, -2.8, 2.5, 4.5);
-      }
-
       ctx.fillStyle = '#09090b';
       ctx.beginPath();
       ctx.roundRect(62, -6.5, 14, 12, 2);
       ctx.fill();
       ctx.stroke();
-      ctx.fillStyle = '#fbbf24';
-      for (let t = 64; t <= 72; t += 4) {
-        ctx.fillRect(t, -8.5, 2, 2);
-        ctx.fillRect(t, 5.5, 2, 2);
-      }
 
+      // Pastillas humbucker
       ctx.fillStyle = '#cbd5e1';
-      ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 1.8;
       ctx.fillRect(2, -4, 7, 8);
       ctx.strokeRect(2, -4, 7, 8);
       ctx.fillRect(11, -4, 7, 8);
       ctx.strokeRect(11, -4, 7, 8);
-
-      ctx.fillStyle = '#e2e8f0';
-      ctx.fillRect(-6, -4.5, 3, 9);
-      ctx.fillRect(-11, -4.5, 2.5, 9);
-
-      ctx.fillStyle = '#d97706';
-      ctx.strokeStyle = '#fef08a';
-      ctx.lineWidth = 1;
-      [[-10, 6], [-4, 6], [-12, 10], [-6, 10]].forEach(([kx, ky]) => {
-        ctx.beginPath();
-        ctx.arc(kx, ky, 2.2, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-      });
-
-      ctx.strokeStyle = 'rgba(255,255,255,0.65)';
-      ctx.lineWidth = 0.9;
-      ctx.beginPath();
-      ctx.moveTo(-10, -2); ctx.lineTo(62, -2);
-      ctx.moveTo(-10, 1); ctx.lineTo(62, 1);
-      ctx.stroke();
       ctx.restore();
 
+      // Brazo derecho rasgueando con tatuaje "fasa"
       ctx.save();
-      ctx.translate(-12, -48);
+      ctx.translate(-12, -46);
       const strumArm = p.guitarStrumAnim > 0 ? Math.sin(p.guitarStrumAnim * 2.2) * 0.35 : 0.08;
       ctx.rotate(strumArm);
-
-      ctx.fillStyle = '#f6cba3';
+      ctx.fillStyle = '#fbd3b0';
       ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 3;
+      ctx.lineWidth = 3.2;
       ctx.beginPath();
-      ctx.roundRect(-6, 0, 13, 24, 6);
+      ctx.roundRect(-6, 0, 13, 23, 6);
       ctx.fill();
       ctx.stroke();
-
       ctx.beginPath();
-      ctx.roundRect(-3, 18, 25, 11, 5);
+      ctx.roundRect(-3, 17, 25, 11, 5);
       ctx.fill();
       ctx.stroke();
-
       ctx.font = 'italic 700 6px "Montserrat"';
-      ctx.fillStyle = 'rgba(24, 24, 27, 0.75)';
-      ctx.fillText('fasa', 4, 25);
-
-      ctx.fillStyle = '#e2e8f0';
-      ctx.fillRect(19, 22, 3, 2.5);
+      ctx.fillStyle = 'rgba(24, 24, 27, 0.8)';
+      ctx.fillText('fasa', 4, 24);
       ctx.restore();
 
+      // CABEZA GRANDE CARTOON DE PATO (proporción Loud House 1.28x en cabeza)
       ctx.save();
-      ctx.translate(2, -84);
+      ctx.translate(2, -88);
+      ctx.scale(1.26, 1.26);
 
-      const hairGrad = ctx.createLinearGradient(-20, -35, 15, 35);
-      hairGrad.addColorStop(0, '#c29b61');
-      hairGrad.addColorStop(0.5, '#8c6239');
-      hairGrad.addColorStop(1, '#593a1e');
+      const hairGrad = ctx.createLinearGradient(-24, -38, 18, 36);
+      hairGrad.addColorStop(0, '#d4af73');
+      hairGrad.addColorStop(0.55, '#9c7040');
+      hairGrad.addColorStop(1, '#614020');
 
+      // Pelo trasero con volumen cartoon
       ctx.fillStyle = hairGrad;
       ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 3;
+      ctx.lineWidth = 3.4;
       ctx.beginPath();
-      ctx.moveTo(-20, -24);
-      ctx.bezierCurveTo(-34, -4, -34, 22, -24, 38);
-      ctx.quadraticCurveTo(-14, 34, -10, 20);
+      ctx.moveTo(-22, -22);
+      ctx.bezierCurveTo(-36, -2, -36, 20, -24, 36);
+      ctx.quadraticCurveTo(-14, 32, -10, 18);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
 
-      drawRealisticComicHead(ctx, {
+      drawLoudCartoonHead(ctx, {
         hasBeard: true,
         beardStyle: 'pato',
         sunglasses: true,
@@ -1046,46 +1085,45 @@
         smile: true
       });
 
+      // Flequillo partido al medio con volumen estilo cartoon moderno
       ctx.fillStyle = hairGrad;
       ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 3;
+      ctx.lineWidth = 3.4;
       ctx.beginPath();
-      ctx.moveTo(-22, -12);
-      ctx.bezierCurveTo(-25, -38, 18, -40, 22, -14);
-      ctx.quadraticCurveTo(10, -26, 0, -24);
-      ctx.quadraticCurveTo(-12, -26, -22, -12);
+      ctx.moveTo(-25, -12);
+      ctx.bezierCurveTo(-28, -42, 22, -42, 25, -13);
+      ctx.quadraticCurveTo(12, -27, 0, -22);
+      ctx.quadraticCurveTo(-12, -27, -25, -12);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
 
+      // Trencita característica con gomita roja
       ctx.fillStyle = hairGrad;
       ctx.beginPath();
-      ctx.moveTo(-16, 4);
-      ctx.bezierCurveTo(-24, 18, -22, 36, -15, 46);
-      ctx.bezierCurveTo(-9, 36, -10, 18, -12, 4);
+      ctx.moveTo(-18, 4);
+      ctx.bezierCurveTo(-26, 18, -24, 34, -17, 45);
+      ctx.bezierCurveTo(-10, 34, -11, 18, -13, 4);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
 
-      ctx.fillStyle = '#dc2626';
-      ctx.fillRect(-19, 10, 7, 3.5);
-      ctx.strokeRect(-19, 10, 7, 3.5);
-
-      ctx.strokeStyle = '#d6b27c';
-      ctx.lineWidth = 1.8;
-      ctx.beginPath();
-      ctx.moveTo(-14, -22); ctx.quadraticCurveTo(-18, -8, -15, 4);
-      ctx.moveTo(14, -22); ctx.quadraticCurveTo(21, -10, 19, 0);
-      ctx.stroke();
+      ctx.fillStyle = '#ef4444';
+      ctx.fillRect(-21, 10, 8, 4);
+      ctx.strokeRect(-21, 10, 8, 4);
 
       ctx.restore();
       ctx.restore();
       ctx.restore();
     }
 
+    // ============================================================================
+    // 2. GUIDO SARDELLI (JEFE NIVEL 1 - GORRA HACIA ATRÁS, REY DEL SINTETIZADOR)
+    // ============================================================================
     function drawGuidoHD(b) {
       ctx.save();
       ctx.translate(b.x, b.y);
+      ctx.scale(CHAR_SCALE, CHAR_SCALE);
 
       ctx.fillStyle = 'rgba(0,0,0,0.55)';
       ctx.beginPath();
@@ -1096,8 +1134,9 @@
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
       ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 3.2;
+      ctx.lineWidth = 3.4;
 
+      // Piernas
       ctx.fillStyle = '#18181b';
       ctx.fillRect(-18, -48, 13, 44);
       ctx.fillRect(5, -48, 13, 44);
@@ -1107,6 +1146,7 @@
       ctx.save();
       ctx.translate(0, -48 - groove);
 
+      // Remera deportiva negra #10 oversize
       const jerseyGrad = ctx.createLinearGradient(-32, -56, 32, 0);
       jerseyGrad.addColorStop(0, '#27272a');
       jerseyGrad.addColorStop(1, '#09090b');
@@ -1125,67 +1165,64 @@
       ctx.font = '900 20px "Montserrat"';
       ctx.fillStyle = '#f8fafc';
       ctx.textAlign = 'center';
-      ctx.fillText('10', 0, -24);
+      ctx.fillText('10', 0, -22);
 
+      // Cabeza grande cartoon de Guido
       ctx.save();
-      ctx.translate(0, -84);
-      ctx.scale(-1, 1);
+      ctx.translate(0, -88);
+      ctx.scale(-1.26, 1.26);
 
-      ctx.fillStyle = '#c29b61';
+      // Colita rubia baja
+      ctx.fillStyle = '#d4af73';
       ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 3;
+      ctx.lineWidth = 3.2;
       ctx.beginPath();
-      ctx.moveTo(-18, 2);
-      ctx.quadraticCurveTo(-28, 16, -20, 34);
-      ctx.quadraticCurveTo(-12, 24, -12, 4);
+      ctx.moveTo(-20, 2);
+      ctx.quadraticCurveTo(-32, 16, -22, 34);
+      ctx.quadraticCurveTo(-13, 24, -13, 4);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
-      ctx.fillStyle = '#fef3c7';
-      ctx.fillRect(-21, 8, 6, 3.5);
 
-      drawRealisticComicHead(ctx, {
+      drawLoudCartoonHead(ctx, {
         hasBeard: true,
         beardStyle: 'guido',
         sunglasses: false,
-        mouthOpen: !b.defeated && Math.sin(b.anim * 0.2) > 0.3,
+        mouthOpen: !b.defeated && Math.sin(b.anim * 0.2) > 0.2,
         smile: !b.defeated,
         eyebrowSlit: true
       });
 
+      // Gorra negra puesta hacia atrás estilo cartoon
       ctx.fillStyle = '#18181b';
       ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 3.2;
+      ctx.lineWidth = 3.4;
       ctx.beginPath();
-      ctx.arc(0, -18, 23, Math.PI * 0.96, Math.PI * 2.04);
+      ctx.arc(0, -20, 25, Math.PI * 0.96, Math.PI * 2.04);
       ctx.fill();
       ctx.stroke();
 
+      // Hueco de ajuste en la frente y mechón rubio
       ctx.fillStyle = '#fde68a';
       ctx.beginPath();
-      ctx.arc(7, -19, 7, Math.PI, 0);
+      ctx.arc(7, -20, 7.5, Math.PI, 0);
       ctx.fill();
       ctx.stroke();
       ctx.fillStyle = '#18181b';
-      ctx.fillRect(0, -21, 15, 4);
-      ctx.strokeRect(0, -21, 15, 4);
+      ctx.fillRect(-1, -22, 16, 4);
+      ctx.strokeRect(-1, -22, 16, 4);
 
+      // Visera hacia atrás
       ctx.fillStyle = '#09090b';
       ctx.beginPath();
-      ctx.roundRect(-36, -22, 16, 7, 3);
+      ctx.roundRect(-39, -24, 18, 8, 4);
       ctx.fill();
       ctx.stroke();
 
-      ctx.strokeStyle = '#e5c185';
-      ctx.lineWidth = 2.8;
-      ctx.beginPath();
-      ctx.moveTo(16, -16); ctx.quadraticCurveTo(22, -2, 17, 12);
-      ctx.moveTo(-14, -14); ctx.quadraticCurveTo(-20, 0, -16, 14);
-      ctx.stroke();
-
       ctx.restore();
       ctx.restore();
 
+      // Teclado / Sintetizador Rojo Rockero en primer plano
       ctx.strokeStyle = '#94a3b8';
       ctx.lineWidth = 6;
       ctx.beginPath();
@@ -1216,32 +1253,37 @@
       ctx.restore();
     }
 
+    // ============================================================================
+    // 3. GASTÓN SARDELLI (JEFE NIVEL 2 - MELENA RUBIA CARTOON Y BULLS #31)
+    // ============================================================================
     function drawGastonHD(b) {
       ctx.save();
       ctx.translate(b.x, b.y);
+      ctx.scale(CHAR_SCALE, CHAR_SCALE);
 
       const shScale = Math.max(0.35, 1 - b.z / 240);
       ctx.fillStyle = 'rgba(0,0,0,0.55)';
       ctx.beginPath();
-      ctx.ellipse(0, 0, 44 * shScale, 14 * shScale, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, 0, 46 * shScale, 14 * shScale, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      ctx.translate(0, -b.z);
+      ctx.translate(0, -b.z / CHAR_SCALE);
       if (!b.facingRight) ctx.scale(-1, 1);
 
       const bounce = Math.sin(b.anim * 0.25) * 5;
       const jumpSpread = b.z > 20 ? 0.35 : Math.sin(b.anim * 0.25) * 0.12;
 
       ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 3.2;
+      ctx.lineWidth = 3.4;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
 
+      // Piernas con bermudas y zapatillas Bulls
       for (let side of [-1, 1]) {
         ctx.save();
         ctx.translate(side * 10, -48);
         ctx.rotate(side * jumpSpread);
-        ctx.fillStyle = '#f6cba3';
+        ctx.fillStyle = '#fbd3b0';
         ctx.fillRect(-5.5, 16, 11, 24);
         ctx.strokeRect(-5.5, 16, 11, 24);
         ctx.fillStyle = '#18181b';
@@ -1251,17 +1293,18 @@
         ctx.stroke();
         ctx.fillStyle = '#dc2626';
         ctx.beginPath();
-        ctx.roundRect(-8, 36, 23, 11, 4);
+        ctx.roundRect(-8, 36, 25, 12, 5);
         ctx.fill();
         ctx.stroke();
         ctx.fillStyle = '#ffffff';
-        ctx.fillRect(-8, 44, 23, 3);
+        ctx.fillRect(-8, 44, 25, 3.5);
         ctx.restore();
       }
 
       ctx.save();
       ctx.translate(0, -48 - bounce);
 
+      // Musculosa BULLS #31
       ctx.fillStyle = '#dc2626';
       ctx.beginPath();
       ctx.roundRect(-30, -54, 60, 28, 8);
@@ -1274,83 +1317,73 @@
       ctx.fill();
       ctx.stroke();
 
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 2.5;
-      ctx.beginPath();
-      ctx.moveTo(-9, -54);
-      ctx.lineTo(0, -42);
-      ctx.lineTo(9, -54);
-      ctx.stroke();
-
-      ctx.font = '900 13px "Montserrat"';
+      ctx.font = '900 12px "Montserrat"';
       ctx.textAlign = 'center';
       ctx.strokeStyle = '#ffffff';
       ctx.lineWidth = 3;
-      ctx.strokeText('BULLS', 0, -20);
+      ctx.strokeText('BULLS', 0, -21);
       ctx.fillStyle = '#dc2626';
-      ctx.fillText('BULLS', 0, -20);
+      ctx.fillText('BULLS', 0, -21);
 
       ctx.font = '900 13px "Montserrat"';
       ctx.strokeText('31', 0, -6);
       ctx.fillText('31', 0, -6);
 
-      ctx.fillStyle = '#f6cba3';
+      // Brazos
+      ctx.fillStyle = '#fbd3b0';
       ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 3;
+      ctx.lineWidth = 3.2;
       ctx.beginPath();
       ctx.roundRect(-44, -46, 20, 11, 5);
       ctx.roundRect(24, -46, 20, 11, 5);
       ctx.fill();
       ctx.stroke();
 
-      ctx.strokeStyle = '#e2e8f0';
-      ctx.lineWidth = 2.2;
-      for (let w = 34; w <= 40; w += 2) {
-        ctx.beginPath();
-        ctx.moveTo(w, -46); ctx.lineTo(w, -35);
-        ctx.stroke();
-      }
-
+      // Cabeza grande cartoon de Gastón con melena rubia unificada tipo nube/rulos cartoon
       ctx.save();
-      ctx.translate(0, -84);
+      ctx.translate(0, -88);
+      ctx.scale(1.26, 1.26);
 
-      const curlGrad = ctx.createRadialGradient(0, -10, 5, 0, -5, 36);
-      curlGrad.addColorStop(0, '#fde047');
-      curlGrad.addColorStop(0.55, '#ca8a04');
-      curlGrad.addColorStop(1, '#713f12');
+      const curlGrad = ctx.createRadialGradient(0, -12, 6, 0, -6, 38);
+      curlGrad.addColorStop(0, '#fef08a');
+      curlGrad.addColorStop(0.55, '#eab308');
+      curlGrad.addColorStop(1, '#a16207');
 
+      // Silueta exterior continua de melena enrulada estilo The Loud House (sin circulitos sueltos)
       ctx.fillStyle = curlGrad;
       ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 3;
-      for (let a = 0; a < Math.PI * 2; a += 0.45) {
-        const rx = Math.cos(a) * 24 - 2;
-        const ry = Math.sin(a) * 25 + 2;
-        ctx.beginPath();
-        ctx.arc(rx, ry, 12, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-      }
-
-      drawRealisticComicHead(ctx, {
-        hasBeard: false,
-        sunglasses: false,
-        mouthOpen: b.z > 20,
-        smile: !b.defeated
-      });
-
-      ctx.fillStyle = curlGrad;
+      ctx.lineWidth = 3.5;
       ctx.beginPath();
-      ctx.arc(-10, -26, 11, 0, Math.PI * 2);
-      ctx.arc(4, -28, 11, 0, Math.PI * 2);
-      ctx.arc(16, -24, 10, 0, Math.PI * 2);
+      ctx.moveTo(-26, 14);
+      ctx.bezierCurveTo(-38, 10, -40, -8, -30, -18);
+      ctx.bezierCurveTo(-34, -32, -16, -42, -4, -36);
+      ctx.bezierCurveTo(6, -44, 24, -38, 26, -24);
+      ctx.bezierCurveTo(38, -16, 36, 4, 26, 12);
+      ctx.bezierCurveTo(30, 24, 16, 30, 8, 22);
+      ctx.lineTo(-10, 22);
+      ctx.bezierCurveTo(-20, 30, -32, 24, -26, 14);
+      ctx.closePath();
       ctx.fill();
       ctx.stroke();
 
-      ctx.strokeStyle = '#a16207';
-      ctx.lineWidth = 2;
+      drawLoudCartoonHead(ctx, {
+        hasBeard: false,
+        sunglasses: false,
+        mouthOpen: b.z > 20 || Math.sin(b.anim * 0.18) > 0.3,
+        smile: !b.defeated
+      });
+
+      // Rulos superiores sobre la frente (silueta limpia)
+      ctx.fillStyle = curlGrad;
+      ctx.strokeStyle = '#09090b';
+      ctx.lineWidth = 3.2;
       ctx.beginPath();
-      ctx.moveTo(-4, -22); ctx.quadraticCurveTo(-2, -10, -6, -4);
-      ctx.moveTo(6, -22); ctx.quadraticCurveTo(10, -12, 5, -3);
+      ctx.moveTo(-24, -14);
+      ctx.bezierCurveTo(-24, -32, -6, -34, 0, -24);
+      ctx.bezierCurveTo(8, -34, 24, -30, 23, -14);
+      ctx.bezierCurveTo(12, -21, -10, -21, -24, -14);
+      ctx.closePath();
+      ctx.fill();
       ctx.stroke();
 
       ctx.restore();
@@ -1358,28 +1391,34 @@
       ctx.restore();
     }
 
+    // ============================================================================
+    // 4. PILI (8 AÑOS - PROPORCIÓN NIÑA ESTILO LOLA / LANA / LUCY DE LOUD HOUSE)
+    // ============================================================================
     function drawPiliHD(p) {
       ctx.save();
       ctx.translate(p.x, p.y);
 
-      const coneGrad = ctx.createLinearGradient(0, -340, 0, 20);
-      coneGrad.addColorStop(0, 'rgba(253, 224, 71, 0.04)');
-      coneGrad.addColorStop(1, 'rgba(253, 224, 71, 0.35)');
+      // Haz de reflector cálido
+      const coneGrad = ctx.createLinearGradient(0, -380, 0, 20);
+      coneGrad.addColorStop(0, 'rgba(253, 224, 71, 0.05)');
+      coneGrad.addColorStop(1, 'rgba(253, 224, 71, 0.36)');
       ctx.fillStyle = coneGrad;
       ctx.beginPath();
-      ctx.moveTo(-25, -340);
-      ctx.lineTo(25, -340);
-      ctx.lineTo(85, 12);
-      ctx.lineTo(-85, 12);
+      ctx.moveTo(-30, -380);
+      ctx.lineTo(30, -380);
+      ctx.lineTo(95, 14);
+      ctx.lineTo(-95, 14);
       ctx.closePath();
       ctx.fill();
 
-      const spotGrad = ctx.createRadialGradient(0, 0, 8, 0, 0, 85);
+      ctx.scale(CHAR_SCALE, CHAR_SCALE);
+
+      const spotGrad = ctx.createRadialGradient(0, 0, 8, 0, 0, 68);
       spotGrad.addColorStop(0, 'rgba(254, 240, 138, 0.75)');
       spotGrad.addColorStop(1, 'rgba(254, 240, 138, 0)');
       ctx.fillStyle = spotGrad;
       ctx.beginPath();
-      ctx.ellipse(0, 4, 85, 24, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, 4, 68, 18, 0, 0, Math.PI * 2);
       ctx.fill();
 
       ctx.strokeStyle = '#09090b';
@@ -1387,6 +1426,7 @@
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
 
+      // Silla de madera en el escenario
       ctx.fillStyle = '#7c2d12';
       ctx.beginPath();
       ctx.roundRect(-24, -68, 48, 9, 3);
@@ -1399,10 +1439,12 @@
       ctx.strokeRect(-19, -68, 5, 68);
       ctx.strokeRect(14, -68, 5, 68);
 
-      const happyJump = p.rescued ? Math.abs(Math.sin(Date.now() * 0.012)) * 28 : 0;
+      const happyJump = p.rescued ? Math.abs(Math.sin(Date.now() * 0.012)) * 22 : 0;
+      ctx.save();
       ctx.translate(0, -happyJump);
 
-      ctx.fillStyle = '#f6cba3';
+      // Piernitas y zapatos rosas
+      ctx.fillStyle = '#fbd3b0';
       ctx.fillRect(-10, -22, 7, 15);
       ctx.fillRect(3, -22, 7, 15);
       ctx.strokeRect(-10, -22, 7, 15);
@@ -1415,6 +1457,7 @@
       ctx.fill();
       ctx.stroke();
 
+      // Vestido colorido alegre
       const dressGrad = ctx.createLinearGradient(-18, -56, 18, -18);
       dressGrad.addColorStop(0, '#f472b6');
       dressGrad.addColorStop(0.35, '#fbbf24');
@@ -1424,14 +1467,14 @@
       ctx.beginPath();
       ctx.moveTo(-13, -54);
       ctx.lineTo(13, -54);
-      ctx.lineTo(20, -18);
-      ctx.lineTo(-20, -18);
+      ctx.lineTo(21, -18);
+      ctx.lineTo(-21, -18);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
 
       if (!p.tied) {
-        ctx.fillStyle = '#f6cba3';
+        ctx.fillStyle = '#fbd3b0';
         ctx.beginPath();
         ctx.roundRect(-25, -74, 9, 24, 4);
         ctx.roundRect(16, -74, 9, 24, 4);
@@ -1439,42 +1482,45 @@
         ctx.stroke();
       }
 
+      // Cabeza grande infantil estilo Lola/Lana (The Loud House)
       ctx.save();
-      ctx.translate(0, -76);
-      ctx.scale(-0.92, 0.92);
+      ctx.translate(0, -82);
+      ctx.scale(-1.18, 1.18);
 
-      const piliHair = ctx.createLinearGradient(-22, -32, 22, 28);
+      const piliHair = ctx.createLinearGradient(-24, -34, 24, 28);
       piliHair.addColorStop(0, '#854d27');
       piliHair.addColorStop(0.5, '#5c3418');
       piliHair.addColorStop(1, '#3b1f0c');
       ctx.fillStyle = piliHair;
       ctx.beginPath();
-      ctx.arc(-3, 2, 26, 0, Math.PI * 2);
+      ctx.arc(-2, 2, 28, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
 
-      drawRealisticComicHead(ctx, {
+      drawLoudCartoonHead(ctx, {
         isChild: true,
-        smile: !p.tied,
-        mouthOpen: p.rescued
+        smile: true,
+        mouthOpen: p.rescued,
+        freckles: true
       });
 
+      // Flequillo redondeado con hebilla violeta
       ctx.fillStyle = piliHair;
       ctx.beginPath();
-      ctx.moveTo(-21, -14);
-      ctx.bezierCurveTo(-18, -36, 18, -36, 22, -14);
-      ctx.quadraticCurveTo(4, -24, -21, -14);
+      ctx.moveTo(-23, -14);
+      ctx.bezierCurveTo(-20, -38, 20, -38, 24, -14);
+      ctx.quadraticCurveTo(4, -25, -23, -14);
       ctx.fill();
       ctx.stroke();
 
       ctx.fillStyle = '#c084fc';
       ctx.beginPath();
-      ctx.arc(-9, -22, 5.5, 0, Math.PI * 2);
+      ctx.arc(-10, -23, 6, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
       ctx.fillStyle = '#fef08a';
       ctx.beginPath();
-      ctx.arc(-9, -22, 2.2, 0, Math.PI * 2);
+      ctx.arc(-10, -23, 2.4, 0, Math.PI * 2);
       ctx.fill();
 
       ctx.restore();
@@ -1487,28 +1533,30 @@
           ctx.moveTo(-19, ry); ctx.lineTo(19, ry);
           ctx.stroke();
         }
-        ctx.beginPath();
-        ctx.moveTo(-12, -13); ctx.lineTo(12, -13);
-        ctx.stroke();
-        drawComicSpeechBubble(ctx, 0, -132, '¡VAMOS PATO! ¡RESCATAME!', '#ffffff', '#dc2626');
+        drawComicSpeechBubble(ctx, 0, -134, '¡VAMOS PATO! ¡RESCATAME!', '#ffffff', '#dc2626');
       } else {
-        drawComicSpeechBubble(ctx, 0, -138, '¡GRACIAS PATO! ¡AGUANTE AIRBAG!', '#fef08a', '#09090b');
+        drawComicSpeechBubble(ctx, 0, -140, '¡GRACIAS PATO! ¡AGUANTE AIRBAG!', '#fef08a', '#09090b');
       }
 
       ctx.restore();
+      ctx.restore();
     }
 
+    // ============================================================================
+    // 5. FANS CARTOON (ESTILO THE LOUD HOUSE Y ESCALA GRANDE)
+    // ============================================================================
     function drawFanHD(f) {
       ctx.save();
       ctx.translate(f.x, f.y);
+      ctx.scale(CHAR_SCALE * 0.92, CHAR_SCALE * 0.92);
 
       ctx.fillStyle = 'rgba(0,0,0,0.45)';
       ctx.beginPath();
-      ctx.ellipse(0, 0, 28, 9, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, 0, 30, 9, 0, 0, Math.PI * 2);
       ctx.fill();
 
       ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 3;
+      ctx.lineWidth = 3.2;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
 
@@ -1540,32 +1588,39 @@
 
       if (!f.facingRight) ctx.scale(-1, 1);
 
-      const walk = Math.sin(f.anim * 0.32) * 10;
+      const walk = Math.sin(f.anim * 0.32) * 11;
 
       ctx.fillStyle = '#1e293b';
-      ctx.fillRect(-8, -38 + walk * 0.25, 8, 36);
-      ctx.fillRect(2, -38 - walk * 0.25, 8, 36);
-      ctx.strokeRect(-8, -38 + walk * 0.25, 8, 36);
-      ctx.strokeRect(2, -38 - walk * 0.25, 8, 36);
+      ctx.fillRect(-9, -38 + walk * 0.25, 8.5, 36);
+      ctx.fillRect(2, -38 - walk * 0.25, 8.5, 36);
+      ctx.strokeRect(-9, -38 + walk * 0.25, 8.5, 36);
+      ctx.strokeRect(2, -38 - walk * 0.25, 8.5, 36);
 
       ctx.fillStyle = f.shirtColor;
       ctx.beginPath();
-      ctx.roundRect(-14, -76, 28, 40, 6);
+      ctx.roundRect(-15, -76, 30, 40, 7);
       ctx.fill();
       ctx.stroke();
 
-      ctx.font = '900 7px "Montserrat"';
+      ctx.font = '900 7.5px "Montserrat"';
       ctx.fillStyle = '#ffffff';
       ctx.textAlign = 'center';
-      ctx.fillText('AIRBAG', 0, -56);
+      ctx.fillText('AIRBAG', 0, -55);
 
+      // Cabeza cartoon grande estilo Loud House
       ctx.save();
-      ctx.translate(0, -96);
-      ctx.scale(0.78, 0.78);
-      drawRealisticComicHead(ctx, { smile: true });
+      ctx.translate(0, -100);
+      ctx.scale(1.06, 1.06);
+      drawLoudCartoonHead(ctx, {
+        smile: true,
+        mouthOpen: !f.pacified && Math.sin(f.anim * 0.2) > 0.5,
+        freckles: true
+      });
       ctx.fillStyle = f.hairColor;
+      ctx.strokeStyle = '#09090b';
+      ctx.lineWidth = 3.2;
       ctx.beginPath();
-      ctx.arc(-2, -22, 21, Math.PI * 0.9, Math.PI * 2.1);
+      ctx.arc(-1, -21, 24, Math.PI * 0.92, Math.PI * 2.08);
       ctx.fill();
       ctx.stroke();
       ctx.restore();
@@ -1573,8 +1628,8 @@
       if (f.pacified) {
         ctx.font = '20px "Bangers"';
         ctx.fillStyle = '#fde047';
-        ctx.strokeText('¡TEMAZO! ♥', 0, -126);
-        ctx.fillText('¡TEMAZO! ♥', 0, -126);
+        ctx.strokeText('¡TEMAZO! ♥', 0, -138);
+        ctx.fillText('¡TEMAZO! ♥', 0, -138);
       }
 
       ctx.restore();
@@ -1582,9 +1637,9 @@
 
     function drawComicSpeechBubble(ctx, x, y, text, bgColor, textColor) {
       ctx.save();
-      ctx.font = '900 11px "Montserrat"';
-      const w = ctx.measureText(text).width + 24;
-      const h = 26;
+      ctx.font = '900 10px "Montserrat"';
+      const w = ctx.measureText(text).width + 22;
+      const h = 24;
       ctx.fillStyle = bgColor;
       ctx.strokeStyle = '#09090b';
       ctx.lineWidth = 3;
@@ -1602,7 +1657,7 @@
 
       ctx.fillStyle = textColor;
       ctx.textAlign = 'center';
-      ctx.fillText(text, x, y + 4);
+      ctx.fillText(text, x, y + 3.5);
       ctx.restore();
     }
 
@@ -1629,36 +1684,34 @@
       ctx.roundRect(x + 3, y + 3, size - 6, size - 6, 9);
       ctx.clip();
 
-      ctx.translate(x + size / 2, y + size / 2 + 8);
-      ctx.scale(1.05, 1.05);
+      ctx.translate(x + size / 2, y + size / 2 + 6);
+      ctx.scale(0.95, 0.95);
 
       if (who === 'pato') {
-        drawRealisticComicHead(ctx, { hasBeard: true, beardStyle: 'pato', sunglasses: true, smile: true });
+        drawLoudCartoonHead(ctx, { hasBeard: true, beardStyle: 'pato', sunglasses: true, smile: true });
         ctx.fillStyle = '#9c7344';
         ctx.strokeStyle = '#09090b';
-        ctx.lineWidth = 2.5;
+        ctx.lineWidth = 2.8;
         ctx.beginPath();
-        ctx.arc(0, -24, 21, Math.PI, 0);
+        ctx.arc(0, -22, 23, Math.PI, 0);
         ctx.fill();
         ctx.stroke();
       } else if (who === 'guido') {
-        drawRealisticComicHead(ctx, { hasBeard: true, beardStyle: 'guido', eyebrowSlit: true, smile: true });
+        drawLoudCartoonHead(ctx, { hasBeard: true, beardStyle: 'guido', eyebrowSlit: true, smile: true });
         ctx.fillStyle = '#18181b';
         ctx.beginPath();
-        ctx.arc(0, -20, 22, Math.PI, 0);
+        ctx.arc(0, -20, 24, Math.PI, 0);
         ctx.fill();
         ctx.stroke();
       } else {
-        ctx.fillStyle = '#ca8a04';
+        ctx.fillStyle = '#eab308';
         ctx.strokeStyle = '#09090b';
-        ctx.lineWidth = 2.5;
-        for (let a = 0; a < Math.PI * 2; a += 0.6) {
-          ctx.beginPath();
-          ctx.arc(Math.cos(a) * 20, Math.sin(a) * 20, 9, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.stroke();
-        }
-        drawRealisticComicHead(ctx, { smile: true });
+        ctx.lineWidth = 2.8;
+        ctx.beginPath();
+        ctx.arc(0, -4, 27, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        drawLoudCartoonHead(ctx, { smile: true });
       }
 
       ctx.restore();
@@ -1672,26 +1725,27 @@
       ctx.fillStyle = grad;
       ctx.fillRect(cameraX, 0, W, FLOOR_TOP);
 
+      // Estructura de luces del recital
       ctx.strokeStyle = '#64748b';
       ctx.lineWidth = 4;
-      ctx.strokeRect(cameraX, 85, W, 26);
+      ctx.strokeRect(cameraX, 74, W, 24);
       for (let tx = Math.floor(cameraX / 40) * 40; tx < cameraX + W; tx += 40) {
         ctx.beginPath();
-        ctx.moveTo(tx, 85); ctx.lineTo(tx + 20, 111);
-        ctx.lineTo(tx + 40, 85);
+        ctx.moveTo(tx, 74); ctx.lineTo(tx + 20, 98);
+        ctx.lineTo(tx + 40, 74);
         ctx.stroke();
       }
 
       const t = Date.now() * 0.002;
       for (let i = 0; i < 6; i++) {
         const lx = cameraX + 120 + i * 215;
-        const beamGrad = ctx.createLinearGradient(lx, 111, lx, FLOOR_TOP);
+        const beamGrad = ctx.createLinearGradient(lx, 98, lx, FLOOR_TOP);
         beamGrad.addColorStop(0, i % 2 === 0 ? 'rgba(56, 189, 248, 0.35)' : 'rgba(244, 63, 94, 0.35)');
         beamGrad.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = beamGrad;
         ctx.beginPath();
-        ctx.moveTo(lx - 12, 111);
-        ctx.lineTo(lx + 12, 111);
+        ctx.moveTo(lx - 12, 98);
+        ctx.lineTo(lx + 12, 98);
         ctx.lineTo(lx + 125 + Math.sin(t + i) * 55, FLOOR_TOP);
         ctx.lineTo(lx - 125 + Math.sin(t + i) * 55, FLOOR_TOP);
         ctx.closePath();
@@ -1703,36 +1757,41 @@
         ctx.strokeStyle = '#000000';
         ctx.lineWidth = 4;
         ctx.beginPath();
-        ctx.roundRect(ax, FLOOR_TOP - 195, 134, 195, 6);
+        ctx.roundRect(ax, FLOOR_TOP - 185, 134, 185, 6);
         ctx.fill();
         ctx.stroke();
 
         ctx.fillStyle = '#d97706';
-        ctx.fillRect(ax + 10, FLOOR_TOP - 186, 114, 16);
+        ctx.fillRect(ax + 10, FLOOR_TOP - 176, 114, 15);
 
         ctx.fillStyle = '#27272a';
-        ctx.fillRect(ax + 10, FLOOR_TOP - 164, 114, 72);
-        ctx.fillRect(ax + 10, FLOOR_TOP - 84, 114, 72);
-        ctx.strokeRect(ax + 10, FLOOR_TOP - 164, 114, 72);
-        ctx.strokeRect(ax + 10, FLOOR_TOP - 84, 114, 72);
+        ctx.fillRect(ax + 10, FLOOR_TOP - 155, 114, 68);
+        ctx.fillRect(ax + 10, FLOOR_TOP - 79, 114, 68);
+        ctx.strokeRect(ax + 10, FLOOR_TOP - 155, 114, 68);
+        ctx.strokeRect(ax + 10, FLOOR_TOP - 79, 114, 68);
 
         ctx.font = 'italic 900 18px "Montserrat"';
         ctx.fillStyle = '#ffffff';
         ctx.textAlign = 'center';
-        ctx.fillText('Airbag', ax + 67, FLOOR_TOP - 124);
-        ctx.fillText('Marshall', ax + 67, FLOOR_TOP - 44);
+        ctx.fillText('Airbag', ax + 67, FLOOR_TOP - 116);
+        ctx.fillText('Marshall', ax + 67, FLOOR_TOP - 40);
       }
 
+      // Piso amplio del escenario
       const floorGrad = ctx.createLinearGradient(0, FLOOR_TOP, 0, H);
-      floorGrad.addColorStop(0, '#1e1b4b');
-      floorGrad.addColorStop(0.3, '#0f172a');
+      floorGrad.addColorStop(0, '#312e81');
+      floorGrad.addColorStop(0.25, '#1e1b4b');
       floorGrad.addColorStop(1, '#09090b');
       ctx.fillStyle = floorGrad;
       ctx.fillRect(cameraX, FLOOR_TOP, W, H - FLOOR_TOP);
 
+      // Borde luminoso del escenario
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillRect(cameraX, FLOOR_TOP, W, 5);
+
       ctx.strokeStyle = 'rgba(148, 163, 184, 0.16)';
       ctx.lineWidth = 2;
-      for (let py = FLOOR_TOP; py < H; py += 34) {
+      for (let py = FLOOR_TOP + 34; py < H; py += 36) {
         ctx.beginPath();
         ctx.moveTo(cameraX, py); ctx.lineTo(cameraX + W, py);
         ctx.stroke();
@@ -1752,36 +1811,36 @@
         ctx.fillStyle = '#1e293b';
         ctx.strokeStyle = '#09090b';
         ctx.lineWidth = 4;
-        ctx.fillRect(bx + 45, 70, 440, FLOOR_TOP - 70);
-        ctx.strokeRect(bx + 45, 70, 440, FLOOR_TOP - 70);
+        ctx.fillRect(bx + 45, 65, 440, FLOOR_TOP - 65);
+        ctx.strokeRect(bx + 45, 65, 440, FLOOR_TOP - 65);
 
         ctx.fillStyle = '#991b1b';
         ctx.beginPath();
-        ctx.roundRect(bx + 75, 115, 380, 118, 12);
+        ctx.roundRect(bx + 75, 102, 380, 112, 12);
         ctx.fill();
         ctx.stroke();
 
         ctx.fillStyle = '#fef9c3';
         ctx.beginPath();
-        ctx.roundRect(bx + 92, 132, 346, 84, 6);
+        ctx.roundRect(bx + 92, 118, 346, 80, 6);
         ctx.fill();
         ctx.stroke();
 
         for (let b = 0; b < 18; b++) {
           ctx.fillStyle = (b + bulbPhase) % 2 === 0 ? '#fde047' : '#f97316';
           ctx.beginPath();
-          ctx.arc(bx + 84 + b * 21, 123, 3.5, 0, Math.PI * 2);
-          ctx.arc(bx + 84 + b * 21, 224, 3.5, 0, Math.PI * 2);
+          ctx.arc(bx + 84 + b * 21, 110, 3.5, 0, Math.PI * 2);
+          ctx.arc(bx + 84 + b * 21, 206, 3.5, 0, Math.PI * 2);
           ctx.fill();
         }
 
-        ctx.font = '72px "Bangers"';
+        ctx.font = '68px "Bangers"';
         ctx.fillStyle = '#dc2626';
         ctx.textAlign = 'center';
-        ctx.fillText('AIRBAG', bx + 265, 198);
+        ctx.fillText('AIRBAG', bx + 265, 181);
         ctx.strokeStyle = '#09090b';
         ctx.lineWidth = 3;
-        ctx.strokeText('AIRBAG', bx + 265, 198);
+        ctx.strokeText('AIRBAG', bx + 265, 181);
 
         const vx = bx + 320;
         const vy = FLOOR_TOP - 135;
@@ -1811,10 +1870,10 @@
       for (let fx = 0; fx < stageLength + 900; fx += 125) {
         ctx.strokeStyle = '#94a3b8';
         ctx.lineWidth = 3.5;
-        ctx.strokeRect(fx, FLOOR_TOP - 54, 115, 54);
+        ctx.strokeRect(fx, FLOOR_TOP - 50, 115, 50);
         for (let bar = fx + 18; bar < fx + 110; bar += 18) {
           ctx.beginPath();
-          ctx.moveTo(bar, FLOOR_TOP - 54); ctx.lineTo(bar, FLOOR_TOP);
+          ctx.moveTo(bar, FLOOR_TOP - 50); ctx.lineTo(bar, FLOOR_TOP);
           ctx.stroke();
         }
       }
@@ -1826,7 +1885,7 @@
       ctx.fillRect(cameraX, FLOOR_TOP, W, H - FLOOR_TOP);
 
       ctx.fillStyle = '#64748b';
-      ctx.fillRect(cameraX, FLOOR_TOP, W, 12);
+      ctx.fillRect(cameraX, FLOOR_TOP, W, 10);
     }
 
     let gameState = 'TITLE';
@@ -1842,14 +1901,14 @@
     };
 
     const pato = {
-      x: 180,
-      y: 575,
+      x: 190,
+      y: 585,
       z: 0,
       vx: 0,
       vy: 0,
       vz: 0,
-      speedX: 6.2,
-      speedY: 4.2,
+      speedX: 6.4,
+      speedY: 4.4,
       facingRight: true,
       hp: 100,
       maxHp: 100,
@@ -1862,8 +1921,8 @@
       walkCycle: 0,
       invuln: 0,
       reset() {
-        this.x = 180;
-        this.y = 575;
+        this.x = 190;
+        this.y = 585;
         this.z = 0;
         this.vx = 0;
         this.vy = 0;
@@ -1896,7 +1955,7 @@
       for (let i = 0; i < totalFans; i++) {
         fans.push({
           x: 480 + i * 155,
-          y: FLOOR_TOP + 35 + (i * 47) % (FLOOR_BOTTOM - FLOOR_TOP - 55),
+          y: FLOOR_TOP + 55 + (i * 53) % (FLOOR_BOTTOM - FLOOR_TOP - 65),
           hp: 32,
           maxHp: 32,
           pacified: false,
@@ -1914,7 +1973,7 @@
           name: 'GUIDO (JEFE 1)',
           subtitle: 'PIANO ROCK & SINTETIZADOR',
           x: stageLength + 340,
-          y: 565,
+          y: 575,
           z: 0,
           vx: 0,
           vy: 0,
@@ -1933,7 +1992,7 @@
           name: 'GASTÓN (JEFE FINAL)',
           subtitle: 'STAGE DIVING • BULLS #31',
           x: stageLength + 320,
-          y: 570,
+          y: 580,
           z: 0,
           vx: 0,
           vy: 0,
@@ -1947,7 +2006,7 @@
         };
         pili = {
           x: stageLength + 600,
-          y: 570,
+          y: 580,
           tied: true,
           rescued: false
         };
@@ -1968,10 +2027,10 @@
       projectiles.push({
         owner: 'pato',
         kind: 'note',
-        x: pato.x + dir * 58,
+        x: pato.x + dir * 75,
         y: pato.y,
-        z: pato.z + 64,
-        vx: dir * 12.5,
+        z: pato.z + 82,
+        vx: dir * 13,
         vy: (Math.random() - 0.5) * 1.4,
         label: note,
         color: cols[Math.floor(Math.random() * cols.length)],
@@ -1979,7 +2038,7 @@
         life: 75
       });
 
-      spawnComicPop(pato.x + dir * 48, pato.y - pato.z - 64, note, '#fde047');
+      spawnComicPop(pato.x + dir * 65, pato.y - pato.z - 88, note, '#fde047');
     }
 
     function swingMicStand() {
@@ -1992,10 +2051,10 @@
       projectiles.push({
         owner: 'pato',
         kind: 'mic_wave',
-        x: pato.x + dir * 68,
+        x: pato.x + dir * 85,
         y: pato.y,
-        z: pato.z + 64,
-        vx: dir * 13.5,
+        z: pato.z + 82,
+        vx: dir * 14,
         vy: 0,
         label: '((( FEEDBACK )))',
         color: '#e879f9',
@@ -2005,11 +2064,11 @@
 
       for (let i = projectiles.length - 1; i >= 0; i--) {
         const p = projectiles[i];
-        if (p.owner === 'boss' && Math.hypot(p.x - (pato.x + dir * 55), p.y - pato.y) < 130) {
+        if (p.owner === 'boss' && Math.hypot(p.x - (pato.x + dir * 65), p.y - pato.y) < 150) {
           projectiles.splice(i, 1);
         }
       }
-      spawnComicPop(pato.x + dir * 68, pato.y - pato.z - 68, '¡MIC BLAST!', '#f472b6');
+      spawnComicPop(pato.x + dir * 82, pato.y - pato.z - 92, '¡MIC BLAST!', '#f472b6');
     }
 
     function unleashSupremeFeedback() {
@@ -2027,16 +2086,16 @@
           kind: 'note',
           x: pato.x,
           y: pato.y,
-          z: pato.z + 62,
-          vx: Math.cos(ang) * 10.5,
-          vy: Math.sin(ang) * 4.5,
+          z: pato.z + 80,
+          vx: Math.cos(ang) * 11,
+          vy: Math.sin(ang) * 4.8,
           label: lbl,
           color: '#38bdf8',
           damage: 35,
           life: 60
         });
       });
-      spawnComicPop(pato.x, pato.y - 125, '¡SUPER ACOPLE 360°!', '#38bdf8');
+      spawnComicPop(pato.x, pato.y - 165, '¡SUPER ACOPLE 360°!', '#38bdf8');
     }
 
     function spawnComicPop(x, y, text, color) {
@@ -2071,7 +2130,7 @@
       if (pato.vx !== 0 || pato.vy !== 0) pato.walkCycle++;
 
       if (keys.jump && pato.z === 0) {
-        pato.vz = 15.5;
+        pato.vz = 16.5;
         audio.tone(280, 'sine', 0.12, 0.08, 520);
       }
 
@@ -2082,9 +2141,9 @@
       pato.x += pato.vx;
       pato.y += pato.vy;
 
-      if (pato.y < FLOOR_TOP + 15) pato.y = FLOOR_TOP + 15;
+      if (pato.y < FLOOR_TOP + 28) pato.y = FLOOR_TOP + 28;
       if (pato.y > FLOOR_BOTTOM) pato.y = FLOOR_BOTTOM;
-      if (pato.x < cameraX + 55) pato.x = cameraX + 55;
+      if (pato.x < cameraX + 65) pato.x = cameraX + 65;
       const maxX = stageLength + 700;
       if (pato.x > maxX) pato.x = maxX;
 
@@ -2107,13 +2166,13 @@
           const dy = pato.y - f.y;
           const dist = Math.hypot(dx, dy);
           f.facingRight = dx > 0;
-          if (dist < 600 && dist > 38) {
+          if (dist < 620 && dist > 46) {
             f.x += (dx / dist) * 1.85;
             f.y += (dy / dist) * 1.15;
-          } else if (dist <= 38 && pato.invuln <= 0 && pato.z < 25) {
+          } else if (dist <= 46 && pato.invuln <= 0 && pato.z < 30) {
             pato.hp -= 4;
             pato.invuln = 35;
-            spawnComicPop(pato.x, pato.y - 110, '¡ABRAZO DE FAN!', '#f472b6');
+            spawnComicPop(pato.x, pato.y - 145, '¡ABRAZO DE FAN!', '#f472b6');
             if (pato.hp <= 0) { pato.hp = 0; gameState = 'GAMEOVER'; }
           }
         }
@@ -2134,7 +2193,7 @@
           }
         }
 
-        if (Math.abs(pato.x - boss.x) < 820) {
+        if (Math.abs(pato.x - boss.x) < 840) {
           boss.attackTimer--;
           if (boss.attackTimer <= 0) {
             if (boss.id === 'guido') {
@@ -2143,9 +2202,9 @@
                 projectiles.push({
                   owner: 'boss',
                   kind: 'piano_note',
-                  x: boss.x - 45,
-                  y: boss.y + (idx - 1) * 32,
-                  z: 58,
+                  x: boss.x - 55,
+                  y: boss.y + (idx - 1) * 34,
+                  z: 78,
                   vx: -8.5,
                   vy: (idx - 1) * 1.2,
                   label: sym,
@@ -2162,9 +2221,9 @@
                 projectiles.push({
                   owner: 'boss',
                   kind: 'thrown_mic',
-                  x: boss.x - 20,
+                  x: boss.x - 28,
                   y: boss.y,
-                  z: 68,
+                  z: 86,
                   vx: Math.cos(ang) * 9.5,
                   vy: Math.sin(ang) * 4.5,
                   label: '🎤',
@@ -2174,10 +2233,10 @@
                 });
                 audio.tone(300, 'triangle', 0.16, 0.09, 140);
               } else {
-                boss.vz = 15.5;
+                boss.vz = 16;
                 boss.vx = (pato.x < boss.x ? -1 : 1) * 4.5;
                 boss.vy = (pato.y - boss.y) * 0.04;
-                spawnComicPop(boss.x, boss.y - 135, '¡STAGE DIVE!', '#ef4444');
+                spawnComicPop(boss.x, boss.y - 175, '¡STAGE DIVE!', '#ef4444');
               }
             }
           }
@@ -2192,24 +2251,24 @@
 
         if (p.owner === 'pato') {
           for (let f of fans) {
-            if (!f.pacified && Math.abs(p.x - f.x) < 42 && Math.abs(p.y - f.y) < 36) {
+            if (!f.pacified && Math.abs(p.x - f.x) < 54 && Math.abs(p.y - f.y) < 46) {
               f.hp -= p.damage;
               p.life = 0;
               pato.energy = Math.min(pato.maxEnergy, pato.energy + 5);
               if (f.hp <= 0) {
                 f.pacified = true;
                 score += 250;
-                spawnComicPop(f.x, f.y - 95, '¡ROCK!', '#4ade80');
+                spawnComicPop(f.x, f.y - 130, '¡ROCK!', '#4ade80');
               }
               break;
             }
           }
 
-          if (boss && !boss.defeated && Math.abs(p.x - boss.x) < 58 && Math.abs(p.y - boss.y) < 48) {
+          if (boss && !boss.defeated && Math.abs(p.x - boss.x) < 74 && Math.abs(p.y - boss.y) < 58) {
             boss.hp -= p.damage;
             p.life = 0;
             score += 150;
-            spawnComicPop(boss.x, boss.y - 125, '¡RIFF! -' + p.damage, '#fde047');
+            spawnComicPop(boss.x, boss.y - 165, '¡RIFF! -' + p.damage, '#fde047');
 
             if (boss.hp <= 0) {
               boss.hp = 0;
@@ -2217,19 +2276,19 @@
               score += 2500;
               audio.sfxWin();
               if (currentStage === 1) {
-                spawnComicPop(boss.x, boss.y - 150, '¡GUIDO VENCIDO! A LA CALLE...', '#4ade80');
+                spawnComicPop(boss.x, boss.y - 190, '¡GUIDO VENCIDO! A LA CALLE...', '#4ade80');
                 setTimeout(() => initStage(2), 2400);
               } else {
-                spawnComicPop(boss.x, boss.y - 150, '¡GASTÓN VENCIDO! ¡ACERCATE A PILI!', '#4ade80');
+                spawnComicPop(boss.x, boss.y - 190, '¡GASTÓN VENCIDO! ¡ACERCATE A PILI!', '#4ade80');
               }
             }
           }
         } else if (p.owner === 'boss' && pato.invuln <= 0) {
-          if (Math.abs(p.x - pato.x) < 36 && Math.abs(p.y - pato.y) < 32 && pato.z < 45) {
+          if (Math.abs(p.x - pato.x) < 44 && Math.abs(p.y - pato.y) < 38 && pato.z < 55) {
             pato.hp -= p.damage;
             pato.invuln = 35;
             p.life = 0;
-            spawnComicPop(pato.x, pato.y - 105, '¡OUCH!', '#ef4444');
+            spawnComicPop(pato.x, pato.y - 145, '¡OUCH!', '#ef4444');
             if (pato.hp <= 0) { pato.hp = 0; gameState = 'GAMEOVER'; }
           }
         }
@@ -2238,7 +2297,7 @@
       }
 
       if (currentStage === 2 && pili && boss && boss.defeated && pili.tied) {
-        if (Math.hypot(pato.x - pili.x, pato.y - pili.y) < 95) {
+        if (Math.hypot(pato.x - pili.x, pato.y - pili.y) < 115) {
           pili.tied = false;
           pili.rescued = true;
           score += 5000;
@@ -2270,26 +2329,26 @@
 
         ctx.fillStyle = '#334155';
         ctx.beginPath();
-        ctx.roundRect(p.x - 8, sy - 5, 22, 10, 4);
+        ctx.roundRect(p.x - 8, sy - 5, 24, 11, 4);
         ctx.fill();
         ctx.stroke();
 
         ctx.fillStyle = '#cbd5e1';
         ctx.beginPath();
-        ctx.arc(p.x - 10, sy, 9.5, 0, Math.PI * 2);
+        ctx.arc(p.x - 10, sy, 10.5, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
       } else {
         ctx.strokeStyle = 'rgba(253, 224, 71, 0.45)';
-        ctx.lineWidth = 1.8;
+        ctx.lineWidth = 2;
         for (let line = -8; line <= 8; line += 4) {
           ctx.beginPath();
-          ctx.moveTo(p.x - 36, sy + line);
+          ctx.moveTo(p.x - 38, sy + line);
           ctx.quadraticCurveTo(p.x - 18, sy + line - 4, p.x, sy + line);
           ctx.stroke();
         }
 
-        ctx.font = '32px "Bangers"';
+        ctx.font = '36px "Bangers"';
         ctx.textAlign = 'center';
         ctx.strokeStyle = '#09090b';
         ctx.lineWidth = 5;
@@ -2300,98 +2359,100 @@
       ctx.restore();
     }
 
+    // HUD compacto y elegante arriba para dejar libre el escenario
     function drawHUDHD() {
       ctx.save();
 
-      drawHDPortraitHUD(18, 14, 76, 'pato');
+      drawHDPortraitHUD(16, 10, 64, 'pato');
 
-      ctx.font = '900 16px "Montserrat"';
+      ctx.font = '900 15px "Montserrat"';
       ctx.fillStyle = '#ffffff';
       ctx.strokeStyle = '#09090b';
       ctx.lineWidth = 4;
       ctx.textAlign = 'left';
-      ctx.strokeText('PATO (PLAYER)', 106, 33);
-      ctx.fillText('PATO (PLAYER)', 106, 33);
+      ctx.strokeText('PATO SARDELLI', 90, 27);
+      ctx.fillText('PATO SARDELLI', 90, 27);
 
       ctx.fillStyle = '#fde047';
-      ctx.strokeText('PTS: ' + score, 265, 33);
-      ctx.fillText('PTS: ' + score, 265, 33);
+      ctx.strokeText('PTS: ' + score, 245, 27);
+      ctx.fillText('PTS: ' + score, 245, 27);
 
       ctx.fillStyle = '#18181b';
       ctx.strokeStyle = '#cbd5e1';
       ctx.lineWidth = 2.5;
       ctx.beginPath();
-      ctx.roundRect(106, 40, 320, 22, 6);
+      ctx.roundRect(90, 33, 290, 18, 6);
       ctx.fill();
       ctx.stroke();
 
-      const hpGrad = ctx.createLinearGradient(110, 42, 420, 42);
+      const hpGrad = ctx.createLinearGradient(94, 35, 376, 35);
       hpGrad.addColorStop(0, '#22c55e');
       hpGrad.addColorStop(1, '#84cc16');
       ctx.fillStyle = hpGrad;
       ctx.beginPath();
-      ctx.roundRect(109, 43, Math.max(0, (pato.hp / pato.maxHp) * 314), 16, 4);
+      ctx.roundRect(93, 36, Math.max(0, (pato.hp / pato.maxHp) * 284), 12, 4);
       ctx.fill();
 
       ctx.fillStyle = '#18181b';
       ctx.beginPath();
-      ctx.roundRect(106, 68, 220, 13, 5);
+      ctx.roundRect(90, 56, 200, 11, 5);
       ctx.fill();
       ctx.stroke();
       ctx.fillStyle = '#38bdf8';
       ctx.beginPath();
-      ctx.roundRect(109, 71, Math.max(0, (pato.energy / pato.maxEnergy) * 214), 7, 3);
+      ctx.roundRect(93, 58.5, Math.max(0, (pato.energy / pato.maxEnergy) * 194), 6, 3);
       ctx.fill();
 
+      // Cartel central compacto
       ctx.textAlign = 'center';
       ctx.fillStyle = 'rgba(24, 24, 27, 0.9)';
       ctx.strokeStyle = '#fbbf24';
       ctx.lineWidth = 3;
       ctx.beginPath();
-      ctx.roundRect(W / 2 - 135, 14, 270, 50, 10);
+      ctx.roundRect(W / 2 - 140, 10, 280, 46, 10);
       ctx.fill();
       ctx.stroke();
 
-      ctx.font = '900 14px "Montserrat"';
+      ctx.font = '900 13px "Montserrat"';
       ctx.fillStyle = '#fbbf24';
-      ctx.fillText(currentStage === 1 ? 'NIVEL 1: EL RECITAL' : 'NIVEL 2: LA CALLE', W / 2, 36);
-      ctx.font = '700 11px "Montserrat"';
+      ctx.fillText(currentStage === 1 ? 'NIVEL 1: EL RECITAL' : 'NIVEL 2: LA CALLE', W / 2, 30);
+      ctx.font = '700 10px "Montserrat"';
       ctx.fillStyle = '#e2e8f0';
       const mins = String(Math.floor(gameTimer / 3600)).padStart(2, '0');
       const secs = String(Math.floor((gameTimer % 3600) / 60)).padStart(2, '0');
-      ctx.fillText('TIEMPO ' + mins + ':' + secs, W / 2, 54);
+      ctx.fillText('TIEMPO ' + mins + ':' + secs + ' • [J] Guitarra [K] Mic [L] Acople', W / 2, 46);
 
       if (boss) {
-        drawHDPortraitHUD(W - 94, 14, 76, boss.id);
+        drawHDPortraitHUD(W - 80, 10, 64, boss.id);
 
         ctx.textAlign = 'right';
-        ctx.font = '900 16px "Montserrat"';
+        ctx.font = '900 15px "Montserrat"';
         ctx.fillStyle = '#ffffff';
         ctx.strokeStyle = '#09090b';
         ctx.lineWidth = 4;
-        ctx.strokeText(boss.name, W - 106, 33);
-        ctx.fillText(boss.name, W - 106, 33);
+        ctx.strokeText(boss.name, W - 90, 27);
+        ctx.fillText(boss.name, W - 90, 27);
 
         ctx.fillStyle = '#18181b';
         ctx.strokeStyle = '#cbd5e1';
         ctx.lineWidth = 2.5;
         ctx.beginPath();
-        ctx.roundRect(W - 426, 40, 320, 22, 6);
+        ctx.roundRect(W - 380, 33, 290, 18, 6);
         ctx.fill();
         ctx.stroke();
 
-        const bw = Math.max(0, (boss.hp / boss.maxHp) * 314);
-        const bossGrad = ctx.createLinearGradient(W - 426, 42, W - 106, 42);
+        const bw = Math.max(0, (boss.hp / boss.maxHp) * 284);
+        const bossGrad = ctx.createLinearGradient(W - 380, 35, W - 90, 35);
         bossGrad.addColorStop(0, '#f97316');
         bossGrad.addColorStop(1, '#dc2626');
         ctx.fillStyle = bossGrad;
         ctx.beginPath();
-        ctx.roundRect(W - 109 - bw, 43, bw, 16, 4);
+        ctx.roundRect(W - 93 - bw, 36, bw, 12, 4);
         ctx.fill();
 
         ctx.font = '800 10px "Montserrat"';
         ctx.fillStyle = '#fda4af';
-        ctx.fillText(boss.subtitle, W - 108, 80);
+        ctx.fillText(boss.subtitle, W - 92, 66);
       }
 
       ctx.restore();
@@ -2428,10 +2489,10 @@
       for (let p of projectiles) drawProjectileHD(p);
 
       for (let pt of particles) {
-        ctx.font = '26px "Bangers"';
+        ctx.font = '28px "Bangers"';
         ctx.textAlign = 'center';
         ctx.strokeStyle = '#09090b';
-        ctx.lineWidth = 4;
+        ctx.lineWidth = 4.5;
         ctx.strokeText(pt.text, pt.x, pt.y);
         ctx.fillStyle = pt.color;
         ctx.fillText(pt.text, pt.x, pt.y);
@@ -2458,49 +2519,57 @@
       ctx.strokeStyle = '#fbbf24';
       ctx.lineWidth = 5;
       ctx.beginPath();
-      ctx.roundRect(W / 2 - 390, 32, 780, 128, 18);
+      ctx.roundRect(W / 2 - 410, 22, 820, 118, 18);
       ctx.fill();
       ctx.stroke();
 
       ctx.textAlign = 'center';
-      ctx.font = '74px "Bangers"';
+      ctx.font = '72px "Bangers"';
       ctx.fillStyle = '#ffffff';
       ctx.strokeStyle = '#09090b';
       ctx.lineWidth = 6;
-      ctx.strokeText('AIRBAG: EL RESCATE DE PILI', W / 2, 110);
-      ctx.fillText('AIRBAG: EL RESCATE DE PILI', W / 2, 110);
+      ctx.strokeText('AIRBAG: EL RESCATE DE PILI', W / 2, 96);
+      ctx.fillText('AIRBAG: EL RESCATE DE PILI', W / 2, 96);
 
-      ctx.font = '900 15px "Montserrat"';
+      ctx.font = '900 14px "Montserrat"';
       ctx.fillStyle = '#fde047';
-      ctx.fillText('EDICIÓN HD CEL-SHADED • MÚSICA MP3 DEL SITIO ACTIVADA POR DEFECTO', W / 2, 142);
+      ctx.fillText('ESTILO CARTOON "THE LOUD HOUSE" • PERSONAJES GRANDES • AUDIO AIRBAG MP3', W / 2, 126);
       ctx.restore();
 
-      pato.x = 260; pato.y = 515; pato.z = 0; pato.facingRight = true;
+      // Desfile de personajes grandes en portada
+      pato.x = 230; pato.y = 535; pato.z = 0; pato.facingRight = true;
       drawPatoHD(pato);
 
-      drawGuidoHD({ x: 540, y: 515, anim: Date.now() * 0.02, defeated: false });
-      drawGastonHD({ x: 810, y: 515, z: 18, anim: Date.now() * 0.025, facingRight: false, defeated: false });
-      drawPiliHD({ x: 1040, y: 515, tied: false, rescued: true });
+      drawGuidoHD({ x: 525, y: 535, anim: Date.now() * 0.02, defeated: false });
+      drawGastonHD({ x: 825, y: 535, z: 18, anim: Date.now() * 0.025, facingRight: false, defeated: false });
+      drawPiliHD({ x: 1075, y: 535, tied: false, rescued: true });
 
-      ctx.font = '900 15px "Montserrat"';
+      ctx.font = '900 16px "Montserrat"';
       ctx.textAlign = 'center';
       ctx.fillStyle = '#fbbf24';
-      ctx.fillText('PATO SARDELLI', 260, 560);
-      ctx.fillText('GUIDO (JEFE NIVEL 1)', 540, 560);
-      ctx.fillText('GASTÓN (JEFE NIVEL 2)', 810, 560);
-      ctx.fillText('PILI (8 AÑOS)', 1040, 560);
+      ctx.strokeStyle = '#09090b';
+      ctx.lineWidth = 4;
+      [
+        ['PATO SARDELLI', 230],
+        ['GUIDO (JEFE NIVEL 1)', 525],
+        ['GASTÓN (JEFE NIVEL 2)', 825],
+        ['PILI (8 AÑOS)', 1075]
+      ].forEach(([txt, tx]) => {
+        ctx.strokeText(txt, tx, 582);
+        ctx.fillText(txt, tx, 582);
+      });
 
       ctx.fillStyle = '#22c55e';
       ctx.strokeStyle = '#09090b';
       ctx.lineWidth = 5;
       ctx.beginPath();
-      ctx.roundRect(W / 2 - 280, 595, 560, 72, 16);
+      ctx.roundRect(W / 2 - 290, 610, 580, 68, 16);
       ctx.fill();
       ctx.stroke();
 
       ctx.font = '38px "Bangers"';
       ctx.fillStyle = '#09090b';
-      ctx.fillText('▶ ¡HACÉ CLIC O PRESIONÁ J PARA EMPEZAR EL RECITAL!', W / 2, 644);
+      ctx.fillText('▶ ¡CLIC O TECLA J PARA EMPEZAR EL RECITAL!', W / 2, 656);
     }
 
     function drawVictoryScreenHD() {
@@ -2519,7 +2588,7 @@
       ctx.strokeStyle = '#fbbf24';
       ctx.lineWidth = 5;
       ctx.beginPath();
-      ctx.roundRect(W / 2 - 430, 75, 860, 565, 22);
+      ctx.roundRect(W / 2 - 440, 55, 880, 605, 22);
       ctx.fill();
       ctx.stroke();
 
@@ -2528,28 +2597,28 @@
       ctx.fillStyle = '#fde047';
       ctx.strokeStyle = '#09090b';
       ctx.lineWidth = 6;
-      ctx.strokeText('¡PATO RESCATÓ A PILI!', W / 2, 160);
-      ctx.fillText('¡PATO RESCATÓ A PILI!', W / 2, 160);
+      ctx.strokeText('¡PATO RESCATÓ A PILI!', W / 2, 135);
+      ctx.fillText('¡PATO RESCATÓ A PILI!', W / 2, 135);
 
       ctx.font = '800 18px "Montserrat"';
       ctx.fillStyle = '#f8fafc';
-      ctx.fillText('¡Pato, Guido, Gastón y Pili festejan juntos en el escenario de AIRBAG!', W / 2, 205);
+      ctx.fillText('¡Pato, Guido, Gastón y Pili festejan juntos en el escenario de AIRBAG!', W / 2, 175);
 
-      pato.x = W / 2 - 95;
-      pato.y = 490;
+      pato.x = W / 2 - 120;
+      pato.y = 520;
       pato.z = Math.abs(Math.sin(Date.now() * 0.01)) * 22;
       pato.facingRight = true;
       drawPatoHD(pato);
 
-      drawPiliHD({ x: W / 2 + 95, y: 490, tied: false, rescued: true });
+      drawPiliHD({ x: W / 2 + 120, y: 520, tied: false, rescued: true });
 
       ctx.font = '38px "Bangers"';
       ctx.fillStyle = '#4ade80';
-      ctx.fillText('PUNTAJE FINAL: ' + score + ' PTS', W / 2, 565);
+      ctx.fillText('PUNTAJE FINAL: ' + score + ' PTS', W / 2, 590);
 
       ctx.font = '800 15px "Montserrat"';
       ctx.fillStyle = '#94a3b8';
-      ctx.fillText('Hacé clic o presioná ESPACIO para volver a jugar', W / 2, 608);
+      ctx.fillText('Hacé clic o presioná ESPACIO para volver a jugar', W / 2, 630);
       ctx.restore();
     }
 
@@ -2577,12 +2646,24 @@
       initStage(stage);
     }
 
+    const controlsOverlay = document.getElementById('controlsOverlay');
+    document.getElementById('btnHelpToggle').addEventListener('click', () => {
+      controlsOverlay.classList.toggle('hidden');
+    });
+    document.getElementById('closeHelpBtn').addEventListener('click', () => {
+      controlsOverlay.classList.add('hidden');
+    });
+
     window.addEventListener('pointerdown', () => {
       audio.init();
     }, { once: true });
 
     window.addEventListener('keydown', (e) => {
       audio.init();
+      if (e.key === 'Escape') {
+        controlsOverlay.classList.add('hidden');
+        return;
+      }
       if (gameState !== 'PLAYING') {
         if ([' ', 'j', 'J', 'Enter'].includes(e.key)) {
           e.preventDefault();
