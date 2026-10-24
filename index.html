@@ -2,25 +2,38 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#09090b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Airbag Pili">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <link id="appleTouchIcon" rel="apple-touch-icon" href="icon.svg">
   <title>AIRBAG: EL RESCATE DE PILI - Cartoon Arcade Edition</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Fredoka:wght@600;700&family=Montserrat:ital,wght@0,700;0,800;0,900;1,900&display=swap" rel="stylesheet">
   <style>
     * {
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
     }
     html, body {
       margin: 0;
       padding: 0;
       width: 100%;
       height: 100%;
+      height: 100dvh;
       background: radial-gradient(circle at center, #1e1b4b 0%, #09090b 100%);
       color: #f8fafc;
       font-family: 'Montserrat', sans-serif;
       user-select: none;
       -webkit-user-select: none;
       overflow: hidden;
+      overscroll-behavior: none;
+      touch-action: manipulation;
     }
     .loud-font {
       font-family: 'Bangers', cursive;
@@ -30,6 +43,8 @@
       background: linear-gradient(180deg, #18181b 0%, #09090b 100%);
       border-bottom: 3px solid #fbbf24;
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.8);
+      padding-left: max(10px, env(safe-area-inset-left));
+      padding-right: max(10px, env(safe-area-inset-right));
     }
     .comic-btn {
       border: 2.5px solid #09090b;
@@ -41,77 +56,121 @@
       box-shadow: 3px 4px 0px #09090b;
       filter: brightness(1.08);
     }
-    .comic-btn:active {
-      transform: translate(1px, 2px);
-      box-shadow: 1px 1px 0px #09090b;
+    .comic-btn:active, .comic-btn.active-touch {
+      transform: translate(2px, 2px) scale(0.95);
+      box-shadow: 0px 1px 0px #09090b;
+      filter: brightness(1.18);
     }
     #stageWrap {
       width: 100vw;
-      height: calc(100vh - 52px);
+      height: calc(100dvh - 48px);
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 6px 10px;
+      padding: 4px max(8px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
       position: relative;
     }
     canvas {
-      width: min(100%, calc((100vh - 66px) * (16 / 9)));
-      height: min(calc(100vh - 66px), calc(100vw * (9 / 16)));
-      border: 4px solid #fbbf24;
+      width: min(100%, calc((100dvh - 60px) * (16 / 9)));
+      height: min(calc(100dvh - 60px), calc(100vw * (9 / 16)));
+      border: 3.5px solid #fbbf24;
       box-shadow: 0 14px 45px rgba(0, 0, 0, 0.92), 0 0 28px rgba(251, 191, 36, 0.22);
-      border-radius: 16px;
+      border-radius: 14px;
       background: #09090b;
       cursor: pointer;
       display: block;
+      touch-action: none;
+    }
+    /* Controles táctiles optimizados para iPhone y Android */
+    #mobileControls {
+      padding-left: max(12px, env(safe-area-inset-left));
+      padding-right: max(12px, env(safe-area-inset-right));
+      padding-bottom: max(10px, env(safe-area-inset-bottom));
+      touch-action: none;
+    }
+    .arcade-pad {
+      width: 132px;
+      height: 132px;
+      border-radius: 9999px;
+      background: radial-gradient(circle, rgba(39,39,42,0.88) 0%, rgba(9,9,11,0.92) 100%);
+      border: 3.5px solid #fbbf24;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.85), inset 0 0 14px rgba(251,191,36,0.2);
+      position: relative;
+      touch-action: none;
+    }
+    .joystick-knob {
+      width: 54px;
+      height: 54px;
+      border-radius: 9999px;
+      background: radial-gradient(circle at 35% 35%, #f87171 0%, #dc2626 55%, #991b1b 100%);
+      border: 3px solid #09090b;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.8);
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      transition: transform 0.04s linear;
+    }
+    @media (max-width: 640px) and (orientation: portrait) {
+      .arcade-pad {
+        width: 118px;
+        height: 118px;
+      }
+      .joystick-knob {
+        width: 48px;
+        height: 48px;
+      }
     }
   </style>
 </head>
 <body class="flex flex-col">
 
-  <!-- BARRA SUPERIOR COMPACTA TODO-EN-UNO (SIN SÁNDWICH INFERIOR) -->
-  <header class="w-full h-[52px] cartoon-bar px-3 flex items-center justify-between gap-2 z-20 shrink-0">
+  <!-- BARRA SUPERIOR COMPACTA TODO-EN-UNO (ADAPTADA A PC Y CELULARES) -->
+  <header class="w-full h-[48px] cartoon-bar flex items-center justify-between gap-1.5 z-30 shrink-0">
     <!-- Logo y Título -->
-    <div class="flex items-center gap-2.5 min-w-0">
-      <div class="bg-gradient-to-b from-red-500 to-red-700 text-white loud-font text-xl sm:text-2xl px-3 py-0.5 rounded-lg border-2 border-amber-300 shadow-[2px_2px_0px_#000] -rotate-2 shrink-0">
+    <div class="flex items-center gap-2 min-w-0">
+      <div class="bg-gradient-to-b from-red-500 to-red-700 text-white loud-font text-lg sm:text-2xl px-2.5 py-0.5 rounded-lg border-2 border-amber-300 shadow-[2px_2px_0px_#000] -rotate-2 shrink-0">
         AIRBAG
       </div>
-      <div class="truncate">
-        <span class="loud-font text-lg sm:text-xl text-amber-400 tracking-wider drop-shadow-[2px_2px_0px_#000]">
+      <div class="truncate hidden xs:block sm:block">
+        <span class="loud-font text-base sm:text-xl text-amber-400 tracking-wider drop-shadow-[2px_2px_0px_#000]">
           EL RESCATE DE PILI
-        </span>
-        <span class="hidden xl:inline-block text-[11px] text-slate-300 font-bold ml-2">
-          • Cartoon Edition
         </span>
       </div>
     </div>
 
-    <!-- Atajos de Nivel + Controles Modal -->
-    <div class="hidden md:flex items-center gap-1.5">
-      <button id="btnStage1" class="comic-btn bg-amber-400 text-black text-[11px] font-extrabold px-2.5 py-1 rounded-lg cursor-pointer">
-        🎹 NIVEL 1: GUIDO
+    <!-- Atajos de Nivel + Instalar App + Controles -->
+    <div class="flex items-center gap-1 sm:gap-1.5">
+      <button id="btnStage1" class="hidden md:inline-flex comic-btn bg-amber-400 text-black text-[11px] font-extrabold px-2.5 py-1 rounded-lg cursor-pointer">
+        🎹 NIVEL 1
       </button>
-      <button id="btnStage2" class="comic-btn bg-red-600 text-white text-[11px] font-extrabold px-2.5 py-1 rounded-lg cursor-pointer">
-        🏀 NIVEL 2: GASTÓN
+      <button id="btnStage2" class="hidden md:inline-flex comic-btn bg-red-600 text-white text-[11px] font-extrabold px-2.5 py-1 rounded-lg cursor-pointer">
+        🏀 NIVEL 2
       </button>
-      <button id="btnBossNow" class="comic-btn bg-cyan-400 text-black text-[11px] font-extrabold px-2.5 py-1 rounded-lg cursor-pointer">
+      <button id="btnBossNow" class="hidden lg:inline-flex comic-btn bg-cyan-400 text-black text-[11px] font-extrabold px-2.5 py-1 rounded-lg cursor-pointer">
         ⚡ IR AL JEFE
       </button>
-      <button id="btnHelpToggle" class="comic-btn bg-violet-500 text-white text-[11px] font-extrabold px-2.5 py-1 rounded-lg cursor-pointer" title="Ver Controles">
-        🎮 CONTROLES
+      <button id="btnInstallApp" class="comic-btn bg-gradient-to-r from-amber-400 to-orange-500 text-black text-[10px] sm:text-[11px] font-black px-2 sm:px-2.5 py-1 rounded-lg cursor-pointer flex items-center gap-1" title="Instalar como Web App en iPhone o Android">
+        <span>📲</span>
+        <span>INSTALAR APP</span>
+      </button>
+      <button id="btnHelpToggle" class="comic-btn bg-violet-500 text-white text-[10px] sm:text-[11px] font-extrabold px-2 sm:px-2.5 py-1 rounded-lg cursor-pointer" title="Controles y Niveles">
+        🎮 MENÚ
       </button>
     </div>
 
     <!-- Reproductor MP3 Integrado -->
-    <div class="flex items-center gap-1.5 bg-zinc-900/95 px-2.5 py-1 rounded-xl border border-zinc-700 shrink-0">
-      <select id="songSelector" class="bg-zinc-800 text-white text-[11px] font-bold px-2 py-1 rounded-lg border border-amber-500/60 focus:outline-none cursor-pointer">
-        <option value="hosted_mp3" selected>💿 Airbag MP3 (Original)</option>
-        <option value="por_mil_noches">🎵 Por Mil Noches (Synth)</option>
-        <option value="cae_el_sol">🎵 Cae el Sol (Synth)</option>
-        <option value="solo_aqui">🎵 Solo Aquí (Synth)</option>
-        <option value="huracan">🎵 Huracán (Synth)</option>
+    <div class="flex items-center gap-1 sm:gap-1.5 bg-zinc-900/95 px-2 py-1 rounded-xl border border-zinc-700 shrink-0">
+      <select id="songSelector" class="bg-zinc-800 text-white text-[10px] sm:text-[11px] font-bold px-1.5 py-1 rounded-lg border border-amber-500/60 focus:outline-none cursor-pointer max-w-[115px] sm:max-w-none">
+        <option value="hosted_mp3" selected>💿 Airbag MP3</option>
+        <option value="por_mil_noches">🎵 Por Mil Noches</option>
+        <option value="cae_el_sol">🎵 Cae el Sol</option>
+        <option value="solo_aqui">🎵 Solo Aquí</option>
+        <option value="huracan">🎵 Huracán</option>
       </select>
 
-      <button id="playPauseMusicBtn" class="comic-btn bg-emerald-500 text-black font-black text-[11px] px-2 py-1 rounded-lg cursor-pointer">
+      <button id="playPauseMusicBtn" class="comic-btn bg-emerald-500 text-black font-black text-[10px] sm:text-[11px] px-2 py-1 rounded-lg cursor-pointer">
         🔊 ON
       </button>
 
@@ -120,66 +179,118 @@
         <input id="volumeSlider" type="range" min="0" max="1" step="0.05" value="0.85" class="w-12 accent-amber-400 cursor-pointer">
       </div>
 
-      <label class="comic-btn bg-gradient-to-r from-pink-500 to-rose-600 text-white font-black text-[11px] px-2 py-1 rounded-lg cursor-pointer flex items-center gap-1" title="Cargar otro MP3">
+      <label class="hidden sm:flex comic-btn bg-gradient-to-r from-pink-500 to-rose-600 text-white font-black text-[11px] px-2 py-1 rounded-lg cursor-pointer items-center gap-1" title="Cargar otro MP3">
         <span>📂 MP3</span>
         <input type="file" id="mp3Uploader" accept="audio/*" multiple class="hidden">
       </label>
-      <span id="customTrackName" class="hidden lg:inline-block text-[10px] text-amber-300 font-extrabold max-w-[130px] truncate">💿 airbag.mp3</span>
+      <span id="customTrackName" class="hidden xl:inline-block text-[10px] text-amber-300 font-extrabold max-w-[120px] truncate">💿 airbag.mp3</span>
     </div>
   </header>
 
-  <!-- ÁREA JUGABLE PANTALLA COMPLETA SIN BARRA INFERIOR -->
+  <!-- ÁREA JUGABLE PANTALLA COMPLETA -->
   <main id="stageWrap">
     <canvas id="gameCanvas" width="1280" height="720"></canvas>
 
-    <!-- TARJETA FLOTANTE DE CONTROLES (SE ABRE CON EL BOTÓN 🎮 CONTROLES O TECLA H) -->
-    <div id="controlsOverlay" class="hidden absolute top-4 left-1/2 -translate-x-1/2 z-30 bg-zinc-950/95 border-4 border-amber-400 rounded-2xl p-4 shadow-2xl max-w-lg w-[92vw] text-center">
-      <h2 class="loud-font text-3xl text-amber-400 mb-2">🎮 CONTROLES DE ESCENARIO</h2>
+    <!-- TARJETA FLOTANTE DE CONTROLES Y ATAJOS MÓVILES -->
+    <div id="controlsOverlay" class="hidden absolute top-3 left-1/2 -translate-x-1/2 z-40 bg-zinc-950/95 border-4 border-amber-400 rounded-2xl p-4 shadow-2xl max-w-lg w-[92vw] text-center max-h-[85dvh] overflow-y-auto">
+      <h2 class="loud-font text-3xl text-amber-400 mb-2">🎮 MENÚ Y CONTROLES</h2>
+      <!-- Atajos rápidos para celular -->
+      <div class="flex flex-wrap items-center justify-center gap-2 mb-3">
+        <button id="btnStage1Mobile" class="comic-btn bg-amber-400 text-black text-xs font-extrabold px-3 py-1.5 rounded-xl cursor-pointer">
+          🎹 NIVEL 1: GUIDO
+        </button>
+        <button id="btnStage2Mobile" class="comic-btn bg-red-600 text-white text-xs font-extrabold px-3 py-1.5 rounded-xl cursor-pointer">
+          🏀 NIVEL 2: GASTÓN
+        </button>
+        <button id="btnBossNowMobile" class="comic-btn bg-cyan-400 text-black text-xs font-extrabold px-3 py-1.5 rounded-xl cursor-pointer">
+          ⚡ IR AL JEFE
+        </button>
+      </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-left font-bold mb-3">
         <div class="bg-zinc-900 p-2.5 rounded-xl border border-zinc-700">
-          <span class="text-amber-400">⬅️➡️⬆️⬇️ / WASD:</span> Mover a Pato
+          <span class="text-amber-400">🕹️ JOYSTICK / FLECHAS:</span> Mover a Pato
         </div>
         <div class="bg-zinc-900 p-2.5 rounded-xl border border-zinc-700">
-          <span class="text-emerald-400">ESPACIO:</span> Saltar
+          <span class="text-emerald-400">⬆️ SALTO / ESPACIO:</span> Saltar
         </div>
         <div class="bg-zinc-900 p-2.5 rounded-xl border border-zinc-700">
-          <span class="text-amber-300">TECLA J (o Z):</span> Guitarra Gibson Les Paul
+          <span class="text-amber-300">🎸 LES PAUL (J o Z):</span> Riff que duerme fans
         </div>
         <div class="bg-zinc-900 p-2.5 rounded-xl border border-zinc-700">
-          <span class="text-fuchsia-400">TECLA K (o X):</span> Barrido con Micrófono
+          <span class="text-fuchsia-400">🎤 MIC (K o X):</span> Barrido de onda musical
         </div>
         <div class="bg-zinc-900 p-2.5 rounded-xl border border-zinc-700 sm:col-span-2">
-          <span class="text-cyan-400">TECLA L (o J+K juntos):</span> ¡Super Acople Sónico 360°!
+          <span class="text-cyan-400">⚡ ACOPLE (L o C):</span> ¡Super Solo Sónico 360°!
         </div>
       </div>
       <button id="closeHelpBtn" class="comic-btn bg-amber-400 text-black font-black text-xs px-5 py-2 rounded-xl cursor-pointer">
-        ¡LISTO, A ROCKEAR! (ESC)
+        ¡LISTO, A ROCKEAR!
       </button>
     </div>
 
-    <!-- CONTROLES TÁCTILES FLOTANTES (SOLO EN MÓVILES / TABLETS) -->
-    <div class="fixed bottom-3 left-3 right-3 flex items-center justify-between pointer-events-none lg:hidden z-20">
-      <div class="flex items-center gap-1.5 pointer-events-auto opacity-85">
-        <button id="tLeft" class="comic-btn w-12 h-12 bg-zinc-900/90 text-white font-black rounded-xl text-lg">◀</button>
-        <div class="flex flex-col gap-1">
-          <button id="tUp" class="comic-btn w-12 h-10 bg-zinc-900/90 text-white font-black rounded-xl text-sm">▲</button>
-          <button id="tDown" class="comic-btn w-12 h-10 bg-zinc-900/90 text-white font-black rounded-xl text-sm">▼</button>
-        </div>
-        <button id="tRight" class="comic-btn w-12 h-12 bg-zinc-900/90 text-white font-black rounded-xl text-lg">▶</button>
-        <button id="tJump" class="comic-btn px-3 h-12 bg-emerald-500 text-black font-black rounded-xl text-xs">SALTAR</button>
+    <!-- MODAL PARA INSTALAR COMO WEB APP EN IPHONE / ANDROID -->
+    <div id="installModal" class="hidden absolute top-3 left-1/2 -translate-x-1/2 z-50 bg-zinc-950/95 border-4 border-amber-400 rounded-2xl p-4 sm:p-5 shadow-2xl max-w-md w-[92vw] text-left max-h-[85dvh] overflow-y-auto">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="loud-font text-2xl sm:text-3xl text-amber-400">📲 INSTALAR EN TU CELU</h2>
+        <button id="closeInstallBtn" class="comic-btn bg-red-600 text-white font-black text-xs px-2.5 py-1 rounded-lg cursor-pointer">✕</button>
       </div>
-      <div class="flex items-center gap-1.5 pointer-events-auto opacity-85">
-        <button id="tGuitar" class="comic-btn px-3 h-12 bg-amber-400 text-black font-black rounded-xl text-xs flex flex-col items-center justify-center">
-          <span>🎸 J</span>
-          <span class="text-[9px]">LES PAUL</span>
+      <p class="text-xs text-slate-300 font-bold mb-3">
+        Podés instalar <span class="text-amber-300">AIRBAG: El Rescate de Pili</span> como una App en tu pantalla de inicio para jugarlo a pantalla completa:
+      </p>
+      <div class="space-y-2.5 text-xs font-bold mb-4">
+        <div class="bg-zinc-900 p-3 rounded-xl border-2 border-amber-400/80">
+          <div class="text-amber-400 text-sm font-black mb-1">🍎 En iPhone / iPad (Safari):</div>
+          <ol class="list-decimal list-inside space-y-1 text-slate-200">
+            <li>Tocá el botón <span class="text-sky-400 font-black">Compartir (⬆️)</span> en la barra de Safari.</li>
+            <li>Deslizá el menú hacia abajo y tocá <span class="text-amber-300 font-black">"Agregar a inicio" (➕)</span>.</li>
+            <li>Tocá <span class="text-emerald-400 font-black">"Agregar"</span> arriba a la derecha. ¡Y listo!</li>
+          </ol>
+        </div>
+        <div class="bg-zinc-900 p-3 rounded-xl border border-zinc-700">
+          <div class="text-emerald-400 text-sm font-black mb-1">🤖 En Android (Chrome):</div>
+          <ol class="list-decimal list-inside space-y-1 text-slate-200">
+            <li>Tocá los tres puntitos <span class="text-amber-300 font-black">(⋮)</span> arriba a la derecha en Chrome.</li>
+            <li>Elegí <span class="text-emerald-300 font-black">"Instalar aplicación"</span> o <span class="text-emerald-300 font-black">"Agregar a la pantalla principal"</span>.</li>
+          </ol>
+        </div>
+      </div>
+      <div class="text-center">
+        <button id="closeInstallBtnBottom" class="comic-btn bg-amber-400 text-black font-black text-xs px-6 py-2 rounded-xl cursor-pointer">
+          ¡ENTENDIDO! 🎸
         </button>
-        <button id="tMic" class="comic-btn px-3 h-12 bg-fuchsia-400 text-black font-black rounded-xl text-xs flex flex-col items-center justify-center">
-          <span>🎤 K</span>
-          <span class="text-[9px]">MIC</span>
+      </div>
+    </div>
+
+    <!-- CONTROLES TÁCTILES ARCADE MULTI-TOUCH (AUTOMÁTICOS EN IPHONE / ANDROID / TABLETS) -->
+    <div id="mobileControls" class="fixed bottom-0 left-0 right-0 flex items-end justify-between pointer-events-none lg:hidden z-20">
+      <!-- JOYSTICK VIRTUAL 8 DIRECCIONES -->
+      <div id="joystickPad" class="arcade-pad pointer-events-auto opacity-90 select-none">
+        <span class="absolute top-1.5 left-1/2 -translate-x-1/2 text-[11px] text-amber-400/80 font-black pointer-events-none">▲</span>
+        <span class="absolute bottom-1.5 left-1/2 -translate-x-1/2 text-[11px] text-amber-400/80 font-black pointer-events-none">▼</span>
+        <span class="absolute left-2 top-1/2 -translate-y-1/2 text-[11px] text-amber-400/80 font-black pointer-events-none">◀</span>
+        <span class="absolute right-2 top-1/2 -translate-y-1/2 text-[11px] text-amber-400/80 font-black pointer-events-none">▶</span>
+        <div id="joystickKnob" class="joystick-knob flex items-center justify-center">
+          <span class="text-[10px] font-black text-amber-200 drop-shadow">🕹️</span>
+        </div>
+      </div>
+
+      <!-- BOTONES DE ACCIÓN ARCADE (MULTI-TOUCH) -->
+      <div class="grid grid-cols-2 gap-2 pointer-events-auto opacity-90 select-none">
+        <button id="tSpecial" class="comic-btn w-16 h-14 sm:w-20 sm:h-14 bg-cyan-400 text-black font-black rounded-2xl text-xs flex flex-col items-center justify-center">
+          <span class="text-base leading-none">⚡</span>
+          <span class="text-[10px] font-black mt-0.5">ACOPLE</span>
         </button>
-        <button id="tSpecial" class="comic-btn px-3 h-12 bg-cyan-400 text-black font-black rounded-xl text-xs flex flex-col items-center justify-center">
-          <span>⚡ L</span>
-          <span class="text-[9px]">ACOPLE</span>
+        <button id="tJump" class="comic-btn w-16 h-14 sm:w-20 sm:h-14 bg-emerald-400 text-black font-black rounded-2xl text-xs flex flex-col items-center justify-center">
+          <span class="text-base leading-none">⬆️</span>
+          <span class="text-[10px] font-black mt-0.5">SALTAR</span>
+        </button>
+        <button id="tGuitar" class="comic-btn w-16 h-16 sm:w-20 sm:h-16 bg-amber-400 text-black font-black rounded-2xl text-xs flex flex-col items-center justify-center">
+          <span class="text-lg leading-none">🎸</span>
+          <span class="text-[10px] font-black mt-0.5">LES PAUL</span>
+        </button>
+        <button id="tMic" class="comic-btn w-16 h-16 sm:w-20 sm:h-16 bg-fuchsia-400 text-black font-black rounded-2xl text-xs flex flex-col items-center justify-center">
+          <span class="text-lg leading-none">🎤</span>
+          <span class="text-[10px] font-black mt-0.5">ONDA MIC</span>
         </button>
       </div>
     </div>
@@ -3058,21 +3169,35 @@
     }
 
     const controlsOverlay = document.getElementById('controlsOverlay');
+    const installModal = document.getElementById('installModal');
+
     document.getElementById('btnHelpToggle').addEventListener('click', () => {
+      installModal.classList.add('hidden');
       controlsOverlay.classList.toggle('hidden');
     });
     document.getElementById('closeHelpBtn').addEventListener('click', () => {
       controlsOverlay.classList.add('hidden');
     });
 
-    window.addEventListener('pointerdown', () => {
+    // Desbloqueo de audio en iPhone / iOS Safari y Android al primer toque
+    const unlockMobileAudio = () => {
       audio.init();
-    }, { once: true });
+      if (audio.ctx && audio.ctx.state === 'suspended') {
+        audio.ctx.resume().catch(() => {});
+      }
+      if (audio.isPlaying && audio.usingCustomMP3 && audio.audioEl.paused) {
+        audio.audioEl.play().catch(() => {});
+      }
+    };
+    window.addEventListener('pointerdown', unlockMobileAudio, { passive: true });
+    window.addEventListener('touchstart', unlockMobileAudio, { passive: true });
+    window.addEventListener('touchend', unlockMobileAudio, { once: true, passive: true });
 
     window.addEventListener('keydown', (e) => {
       audio.init();
       if (e.key === 'Escape') {
         controlsOverlay.classList.add('hidden');
+        installModal.classList.add('hidden');
         return;
       }
       if (gameState !== 'PLAYING') {
@@ -3108,6 +3233,7 @@
     });
 
     canvas.addEventListener('pointerdown', () => {
+      unlockMobileAudio();
       if (gameState !== 'PLAYING') startGame(1);
     });
 
@@ -3129,34 +3255,207 @@
       audio.loadMP3(e.target.files);
     });
 
-    document.getElementById('btnStage1').addEventListener('click', () => startGame(1));
-    document.getElementById('btnStage2').addEventListener('click', () => startGame(2));
-    document.getElementById('btnBossNow').addEventListener('click', () => {
+    const goToBoss = () => {
       if (gameState !== 'PLAYING') startGame(currentStage);
       pato.x = stageLength + 60;
       cameraX = stageLength - 320;
-    });
+      controlsOverlay.classList.add('hidden');
+    };
 
+    document.getElementById('btnStage1').addEventListener('click', () => startGame(1));
+    document.getElementById('btnStage2').addEventListener('click', () => startGame(2));
+    document.getElementById('btnBossNow').addEventListener('click', goToBoss);
+
+    document.getElementById('btnStage1Mobile').addEventListener('click', () => {
+      controlsOverlay.classList.add('hidden');
+      startGame(1);
+    });
+    document.getElementById('btnStage2Mobile').addEventListener('click', () => {
+      controlsOverlay.classList.add('hidden');
+      startGame(2);
+    });
+    document.getElementById('btnBossNowMobile').addEventListener('click', goToBoss);
+
+    // =========================================================================
+    // JOYSTICK VIRTUAL 8 DIRECCIONES MULTI-TOUCH (IPHONE / ANDROID)
+    // =========================================================================
+    const joystickPad = document.getElementById('joystickPad');
+    const joystickKnob = document.getElementById('joystickKnob');
+    let activeJoystickTouchId = null;
+
+    function updateJoystickFromPoint(clientX, clientY) {
+      const rect = joystickPad.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const maxRadius = rect.width * 0.34;
+
+      let dx = clientX - centerX;
+      let dy = clientY - centerY;
+      const dist = Math.hypot(dx, dy);
+
+      if (dist > maxRadius) {
+        dx = (dx / dist) * maxRadius;
+        dy = (dy / dist) * maxRadius;
+      }
+
+      joystickKnob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+
+      const deadzone = 12;
+      keys.left = dx < -deadzone;
+      keys.right = dx > deadzone;
+      keys.up = dy < -deadzone;
+      keys.down = dy > deadzone;
+    }
+
+    function resetJoystick() {
+      activeJoystickTouchId = null;
+      joystickKnob.style.transform = 'translate(-50%, -50%)';
+      keys.left = false;
+      keys.right = false;
+      keys.up = false;
+      keys.down = false;
+    }
+
+    if (joystickPad) {
+      joystickPad.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        unlockMobileAudio();
+        if (gameState !== 'PLAYING') startGame(1);
+        const touch = e.changedTouches[0];
+        activeJoystickTouchId = touch.identifier;
+        updateJoystickFromPoint(touch.clientX, touch.clientY);
+      }, { passive: false });
+
+      joystickPad.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        for (let i = 0; i < e.changedTouches.length; i++) {
+          const t = e.changedTouches[i];
+          if (t.identifier === activeJoystickTouchId) {
+            updateJoystickFromPoint(t.clientX, t.clientY);
+            break;
+          }
+        }
+      }, { passive: false });
+
+      const endJoystickTouch = (e) => {
+        for (let i = 0; i < e.changedTouches.length; i++) {
+          if (e.changedTouches[i].identifier === activeJoystickTouchId) {
+            resetJoystick();
+            break;
+          }
+        }
+      };
+      joystickPad.addEventListener('touchend', endJoystickTouch, { passive: false });
+      joystickPad.addEventListener('touchcancel', endJoystickTouch, { passive: false });
+    }
+
+    // Botones de acción multi-touch con feedback visual
     function bindTouch(id, k) {
       const el = document.getElementById(id);
       if (!el) return;
-      const on = (e) => { e.preventDefault(); if (gameState !== 'PLAYING') startGame(1); keys[k] = true; };
-      const off = (e) => { e.preventDefault(); keys[k] = false; };
-      el.addEventListener('touchstart', on);
-      el.addEventListener('touchend', off);
+      const on = (e) => {
+        e.preventDefault();
+        unlockMobileAudio();
+        if (gameState !== 'PLAYING') startGame(1);
+        keys[k] = true;
+        el.classList.add('active-touch');
+      };
+      const off = (e) => {
+        e.preventDefault();
+        keys[k] = false;
+        el.classList.remove('active-touch');
+      };
+      el.addEventListener('touchstart', on, { passive: false });
+      el.addEventListener('touchend', off, { passive: false });
+      el.addEventListener('touchcancel', off, { passive: false });
       el.addEventListener('mousedown', on);
       el.addEventListener('mouseup', off);
       el.addEventListener('mouseleave', off);
     }
 
-    bindTouch('tLeft', 'left');
-    bindTouch('tRight', 'right');
-    bindTouch('tUp', 'up');
-    bindTouch('tDown', 'down');
     bindTouch('tJump', 'jump');
     bindTouch('tGuitar', 'guitar');
     bindTouch('tMic', 'mic');
     bindTouch('tSpecial', 'special');
+
+    // =========================================================================
+    // INSTALACIÓN COMO WEB APP (PWA) EN IPHONE Y ANDROID
+    // =========================================================================
+    let deferredInstallPrompt = null;
+    const btnInstallApp = document.getElementById('btnInstallApp');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+    });
+
+    btnInstallApp.addEventListener('click', async () => {
+      controlsOverlay.classList.add('hidden');
+      if (deferredInstallPrompt) {
+        deferredInstallPrompt.prompt();
+        await deferredInstallPrompt.userChoice.catch(() => {});
+        deferredInstallPrompt = null;
+      } else {
+        installModal.classList.toggle('hidden');
+      }
+    });
+
+    document.getElementById('closeInstallBtn').addEventListener('click', () => {
+      installModal.classList.add('hidden');
+    });
+    document.getElementById('closeInstallBtnBottom').addEventListener('click', () => {
+      installModal.classList.add('hidden');
+    });
+
+    // Generar ícono PNG dinámico para que iPhone (Safari) lo use en "Agregar a inicio"
+    function generateAppleTouchIcon() {
+      try {
+        const ic = document.createElement('canvas');
+        ic.width = 180;
+        ic.height = 180;
+        const ictx = ic.getContext('2d');
+        const g = ictx.createRadialGradient(90, 80, 10, 90, 90, 110);
+        g.addColorStop(0, '#312e81');
+        g.addColorStop(1, '#09090b');
+        ictx.fillStyle = g;
+        ictx.fillRect(0, 0, 180, 180);
+        ictx.strokeStyle = '#fbbf24';
+        ictx.lineWidth = 8;
+        ictx.strokeRect(4, 4, 172, 172);
+        // Guitarra dorada cartoon
+        ictx.save();
+        ictx.translate(90, 82);
+        ictx.rotate(-0.5);
+        ictx.fillStyle = '#78350f';
+        ictx.fillRect(-6, -65, 12, 55);
+        ictx.fillStyle = '#f59e0b';
+        ictx.beginPath();
+        ictx.arc(0, 12, 28, 0, Math.PI * 2);
+        ictx.fill();
+        ictx.lineWidth = 4;
+        ictx.strokeStyle = '#09090b';
+        ictx.stroke();
+        ictx.restore();
+        // Cartel AIRBAG
+        ictx.fillStyle = '#dc2626';
+        ictx.fillRect(16, 122, 148, 38);
+        ictx.strokeStyle = '#09090b';
+        ictx.lineWidth = 4;
+        ictx.strokeRect(16, 122, 148, 38);
+        ictx.fillStyle = '#ffffff';
+        ictx.font = '900 28px Impact, sans-serif';
+        ictx.textAlign = 'center';
+        ictx.fillText('AIRBAG', 90, 151);
+        const link = document.getElementById('appleTouchIcon');
+        if (link) link.href = ic.toDataURL('image/png');
+      } catch (e) {}
+    }
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
 
     function loop() {
       update();
@@ -3164,7 +3463,10 @@
       requestAnimationFrame(loop);
     }
 
-    window.onload = () => loop();
+    window.onload = () => {
+      generateAppleTouchIcon();
+      loop();
+    };
   </script>
 </body>
 </html>

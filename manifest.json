@@ -1,0 +1,19 @@
+{
+  "name": "AIRBAG: El Rescate de Pili",
+  "short_name": "Airbag Pili",
+  "description": "Videojuego arcade beat-'em-up de Airbag: ¡Dormí a los fans y rescatá a Pili con Pato Sardelli!",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#09090b",
+  "theme_color": "#ef4444",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
