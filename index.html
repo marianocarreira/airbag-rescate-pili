@@ -628,327 +628,369 @@
 
     const W = 1280;
     const H = 720;
-    // Área jugable ampliada para que los personajes grandes tengan mucho espacio
+    // Área jugable amplia para personajes con proporciones humanas realistas
     const FLOOR_TOP = 420;
     const FLOOR_BOTTOM = 696;
-    const CHAR_SCALE = 1.48; // Escala cartoon grande estilo The Loud House
+    const CHAR_SCALE = 1.42;
 
     // ============================================================================
-    // CABEZA CARTOON ESTILO "THE LOUD HOUSE" (OJOS GRANDES UNIDOS, NARIZ REDONDA,
-    // BOCA EXPRESIVA CON DIENTES Y LENGUA, TRAZOS GRUESOS DE TINTA)
+    // CARGA DE ROSTROS REALES EXACTOS DE LOS PERSONAJES PRINCIPALES
     // ============================================================================
-    function drawLoudCartoonHead(ctx, opts = {}) {
+    const CHAR_FACES = {
+      pato: { img: new Image(), ready: false, src: 'pato_face.png' },
+      guido: { img: new Image(), ready: false, src: 'guido_face.png' },
+      gaston: { img: new Image(), ready: false, src: 'gaston_face.png' },
+      pili: { img: new Image(), ready: false, src: 'pili_face.png' }
+    };
+
+    Object.keys(CHAR_FACES).forEach((k) => {
+      const entry = CHAR_FACES[k];
+      entry.img.onload = () => { entry.ready = true; };
+      entry.img.onerror = () => { entry.ready = false; };
+      entry.img.src = entry.src;
+    });
+
+    // ============================================================================
+    // CABEZA HUMANA REALISTA (PROPORCIONES ANATÓMICAS REALES, ROSTRO FOTOGRÁFICO
+    // EXACTO CUANDO ESTÁ DISPONIBLE O FACCIONES HUMANAS REALISTAS SIN CARTOON)
+    // ============================================================================
+    function drawRealisticHumanHead(ctx, opts = {}) {
       const {
-        skinBase = '#fbd3b0',
-        skinShadow = '#e6ad82',
+        photoKey = null,
+        skinBase = '#e8be9e',
+        skinShadow = '#c5906e',
+        skinHighlight = '#f7dcc6',
         hasBeard = false,
         beardStyle = 'pato',
         sunglasses = false,
         mouthOpen = false,
-        smile = true,
+        smile = false,
         eyebrowSlit = false,
         isChild = false,
         isFemale = false,
         sleeping = false,
-        eyeColor = '#2b1b12',
-        freckles = false
+        eyeColor = '#23170f'
       } = opts;
 
       ctx.save();
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
-      const ink = '#141117';
 
-      // Cuello cartoon
-      if (!isChild) {
-        ctx.fillStyle = skinShadow;
-        ctx.strokeStyle = ink;
-        ctx.lineWidth = 3.4;
-        ctx.beginPath();
-        ctx.roundRect(-9, 14, 16, 16, 5);
-        ctx.fill();
-        ctx.stroke();
-      }
-
-      // Oreja trasera / lateral estilo Loud House (redonda con línea interna en C)
-      ctx.fillStyle = skinBase;
-      ctx.strokeStyle = ink;
-      ctx.lineWidth = 3.4;
+      // Cuello humano anatómico con sombreado de clavícula y esternocleidomastoideo
+      const neckW = isChild ? 11 : (isFemale ? 12 : 15);
+      const neckGrad = ctx.createLinearGradient(-neckW / 2, 12, neckW / 2, 28);
+      neckGrad.addColorStop(0, skinShadow);
+      neckGrad.addColorStop(0.5, skinBase);
+      neckGrad.addColorStop(1, '#9e6d4e');
+      ctx.fillStyle = neckGrad;
       ctx.beginPath();
-      ctx.arc(-25, 0, isChild ? 7.5 : 8.5, 0, Math.PI * 2);
+      ctx.roundRect(-neckW / 2, 13, neckW, 16, 4);
       ctx.fill();
-      ctx.stroke();
 
-      ctx.strokeStyle = '#c48257';
-      ctx.lineWidth = 2.2;
-      ctx.beginPath();
-      ctx.arc(-25, 0, 4, Math.PI * 0.4, Math.PI * 1.6);
-      ctx.stroke();
+      // Si el personaje tiene su foto real cargada (ej. Pato Sardelli), renderizar su cara real exacta
+      if (photoKey && CHAR_FACES[photoKey] && CHAR_FACES[photoKey].ready) {
+        const faceEntry = CHAR_FACES[photoKey];
 
-      if (!isChild) {
-        // Aro rockero plateado
-        ctx.strokeStyle = '#f8fafc';
-        ctx.lineWidth = 2.4;
-        ctx.beginPath();
-        ctx.arc(-26, 7.5, 3.5, 0, Math.PI * 2);
-        ctx.stroke();
+        // Mechones largos rubios/castaños cayendo sobre los hombros detrás de la cara (fiel a las fotos de Pato)
+        if (photoKey === 'pato') {
+          const longHairGrad = ctx.createLinearGradient(-26, -10, 26, 42);
+          longHairGrad.addColorStop(0, '#4a3319');
+          longHairGrad.addColorStop(0.45, '#b89352');
+          longHairGrad.addColorStop(0.8, '#d8b878');
+          longHairGrad.addColorStop(1, '#6e4f26');
+          ctx.fillStyle = longHairGrad;
+          ctx.beginPath();
+          ctx.moveTo(-20, -6);
+          ctx.bezierCurveTo(-29, 12, -30, 30, -22, 42);
+          ctx.lineTo(22, 42);
+          ctx.bezierCurveTo(30, 30, 29, 12, 20, -6);
+          ctx.closePath();
+          ctx.fill();
+
+          // Trencita blanca y negra lateral característica de la foto 1 de Pato
+          ctx.save();
+          ctx.translate(-16, 16);
+          for (let seg = 0; seg < 5; seg++) {
+            ctx.fillStyle = seg % 2 === 0 ? '#f1f5f9' : '#18181b';
+            ctx.beginPath();
+            ctx.ellipse(-seg * 0.6, seg * 4.2, 3.2, 2.6, 0.2, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.restore();
+        }
+
+        // Dibujar la foto real recortada con alta nitidez
+        ctx.save();
+        const fw = isChild ? 40 : 48;
+        const fh = isChild ? 54 : 66;
+        ctx.drawImage(faceEntry.img, -fw / 2, -40, fw, fh);
+        ctx.restore();
+
+        ctx.restore();
+        return;
       }
 
-      // Silueta de cabeza ancha y expresiva estilo The Loud House (mejillas redondeadas)
-      const headGrad = ctx.createLinearGradient(-24, -34, 24, 26);
-      headGrad.addColorStop(0, '#ffe4ca');
-      headGrad.addColorStop(0.65, skinBase);
-      headGrad.addColorStop(1, skinShadow);
+      // ==========================================================================
+      // ROSTRO HUMANO REALISTA ANATÓMICO (SIN RASGOS CARTOON NI OJOS GIGANTES)
+      // ==========================================================================
+      // Orejas humanas proporcionadas
+      ctx.fillStyle = skinShadow;
+      ctx.beginPath();
+      ctx.ellipse(-17.5, -2, 3.2, 6.2, -0.08, 0, Math.PI * 2);
+      ctx.ellipse(17.5, -2, 3.2, 6.2, 0.08, 0, Math.PI * 2);
+      ctx.fill();
 
-      ctx.fillStyle = headGrad;
-      ctx.strokeStyle = ink;
-      ctx.lineWidth = 3.6;
+      // Cráneo y mandíbula humana realista (contorno anatómico en V suave)
+      const faceGrad = ctx.createRadialGradient(0, -6, 3, 0, -2, 26);
+      faceGrad.addColorStop(0, skinHighlight);
+      faceGrad.addColorStop(0.55, skinBase);
+      faceGrad.addColorStop(1, skinShadow);
 
+      ctx.fillStyle = faceGrad;
       ctx.beginPath();
       if (isChild) {
-        // Cabeza infantil bien redonda tipo Lola / Lana / Lucy
-        ctx.moveTo(-24, -18);
-        ctx.bezierCurveTo(-29, 4, -22, 23, 0, 23);
-        ctx.bezierCurveTo(24, 23, 29, 4, 23, -18);
-        ctx.bezierCurveTo(17, -36, -17, -36, -24, -18);
+        ctx.moveTo(-14.5, -16);
+        ctx.bezierCurveTo(-16, -3, -14, 10, -6, 17);
+        ctx.quadraticCurveTo(0, 20, 6, 17);
+        ctx.bezierCurveTo(14, 10, 16, -3, 14.5, -16);
+        ctx.bezierCurveTo(11, -28, -11, -28, -14.5, -16);
       } else {
-        // Cabeza cartoon joven/adulto con mejilla marcada tipo Lincoln / Luna / Leni
-        ctx.moveTo(-24, -24);
-        ctx.bezierCurveTo(-27, -4, -26, 16, -8, 24);
-        ctx.quadraticCurveTo(6, 26, 18, 20);
-        ctx.bezierCurveTo(28, 13, 27, -4, 23, -24);
-        ctx.bezierCurveTo(16, -38, -16, -38, -24, -24);
+        ctx.moveTo(-16.5, -18);
+        ctx.bezierCurveTo(-17.5, -5, -16.5, 6, -11, 15);
+        ctx.lineTo(-4.5, 21);
+        ctx.quadraticCurveTo(0, 22.8, 4.5, 21);
+        ctx.lineTo(11, 15);
+        ctx.bezierCurveTo(16.5, 6, 17.5, -5, 16.5, -18);
+        ctx.bezierCurveTo(12, -31, -12, -31, -16.5, -18);
       }
       ctx.closePath();
       ctx.fill();
+
+      // Sombra sutil de pómulos y mandíbula realista
+      ctx.strokeStyle = 'rgba(92, 54, 34, 0.45)';
+      ctx.lineWidth = 1.2;
       ctx.stroke();
 
-      // Rubor cálido de mejilla estilo cartoon moderno
-      ctx.fillStyle = 'rgba(244, 114, 182, 0.22)';
+      // Sombreado anatómico bajo los pómulos
+      ctx.fillStyle = 'rgba(140, 88, 56, 0.16)';
       ctx.beginPath();
-      ctx.ellipse(-12, 5, 6.5, 4, 0, 0, Math.PI * 2);
-      ctx.ellipse(17, 5, 5.5, 3.5, 0, 0, Math.PI * 2);
+      ctx.ellipse(-11, 5, 4.5, 6, 0.25, 0, Math.PI * 2);
+      ctx.ellipse(11, 5, 4.5, 6, -0.25, 0, Math.PI * 2);
       ctx.fill();
 
-      // Barba corta estilizada cartoon (para Pato y Guido)
-      if (hasBeard) {
-        ctx.fillStyle = beardStyle === 'pato' ? 'rgba(92, 62, 38, 0.42)' : 'rgba(68, 48, 32, 0.48)';
+      // Barba / sombreado facial realista (tipo Pato / Guido)
+      if (hasBeard && !isChild && !isFemale) {
+        ctx.fillStyle = 'rgba(42, 30, 22, 0.26)';
         ctx.beginPath();
-        ctx.moveTo(-22, 2);
-        ctx.bezierCurveTo(-21, 18, -8, 24, 5, 24);
-        ctx.bezierCurveTo(19, 23, 25, 13, 24, 2);
-        ctx.quadraticCurveTo(16, 11, 3, 11);
-        ctx.quadraticCurveTo(-12, 11, -22, 2);
+        ctx.moveTo(-15.5, 2);
+        ctx.bezierCurveTo(-15, 13, -8, 20, 0, 21.8);
+        ctx.bezierCurveTo(8, 20, 15, 13, 15.5, 2);
+        ctx.quadraticCurveTo(9, 12, 0, 13);
+        ctx.quadraticCurveTo(-9, 12, -15.5, 2);
         ctx.closePath();
         ctx.fill();
 
-        // Candado / bigote cartoon definido
-        ctx.fillStyle = '#3b2819';
+        // Bigote humano realista partido al centro y mosca (soul patch) bajo el labio
+        ctx.fillStyle = 'rgba(35, 24, 17, 0.78)';
         ctx.beginPath();
-        ctx.roundRect(-8, 4, 22, 4.2, 2);
+        ctx.moveTo(-8.5, 9.5);
+        ctx.quadraticCurveTo(-4, 6.8, -0.5, 8.2);
+        ctx.quadraticCurveTo(4, 6.8, 8.5, 9.5);
+        ctx.quadraticCurveTo(4, 10.5, 0, 9.4);
+        ctx.quadraticCurveTo(-4, 10.5, -8.5, 9.5);
         ctx.fill();
-        ctx.beginPath();
-        ctx.roundRect(-1, 17, 8, 5.5, 2.5);
-        ctx.fill();
-      }
 
-      // BOCA GRANDE EXPRESIVA ESTILO "THE LOUD HOUSE" (dientes blancos arriba + lengua rosa)
-      ctx.strokeStyle = ink;
-      ctx.lineWidth = 3;
-      if (sleeping) {
-        // Boquita relajada durmiendo ("o" suave)
-        ctx.fillStyle = '#580c1f';
+        // Mosca en el mentón (soul patch)
         ctx.beginPath();
-        ctx.ellipse(3, 12, 4.2, 3.2, 0, 0, Math.PI * 2);
+        ctx.ellipse(0, 15.2, 2.2, 1.8, 0, 0, Math.PI * 2);
         ctx.fill();
-        ctx.stroke();
-      } else if (mouthOpen) {
-        // Boca abierta cantando / gritando rock
-        ctx.fillStyle = '#580c1f';
-        ctx.beginPath();
-        ctx.moveTo(-10, 7);
-        ctx.quadraticCurveTo(4, 5, 16, 7);
-        ctx.bezierCurveTo(19, 18, 10, 22, 2, 22);
-        ctx.bezierCurveTo(-8, 22, -13, 16, -10, 7);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
 
-        // Fila superior de dientes blancos
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.moveTo(-9, 7.5);
-        ctx.quadraticCurveTo(4, 6, 15, 7.5);
-        ctx.lineTo(14, 12);
-        ctx.quadraticCurveTo(3, 11, -8, 12);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-
-        // Lengua rosada cartoon
-        ctx.fillStyle = '#fb7185';
-        ctx.beginPath();
-        ctx.ellipse(3, 18.5, 7.5, 3.6, 0, Math.PI, Math.PI * 2);
-        ctx.fill();
-      } else if (smile) {
-        // Sonrisa ancha blanca clásica de The Loud House
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.moveTo(-10, 7.5);
-        ctx.quadraticCurveTo(3, 10, 16, 6.5);
-        ctx.bezierCurveTo(15, 18, -6, 18, -10, 7.5);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-
-        // Línea divisoria de dientes
+        // Sombra de barba en el borde del mentón
+        ctx.strokeStyle = 'rgba(35, 24, 17, 0.65)';
         ctx.lineWidth = 1.8;
         ctx.beginPath();
-        ctx.moveTo(-6, 12.5);
-        ctx.quadraticCurveTo(3, 14, 12, 11.5);
-        ctx.stroke();
-      } else {
-        ctx.beginPath();
-        ctx.moveTo(-6, 13);
-        ctx.quadraticCurveTo(3, 10, 12, 13);
+        ctx.moveTo(-6, 19.5);
+        ctx.quadraticCurveTo(0, 21.8, 6, 19.5);
         ctx.stroke();
       }
 
-      // OJOS GRANDES OVALADOS UNIDOS ESTILO "THE LOUD HOUSE"
-      const eyeRX = isChild ? 8.2 : 7.6;
-      const eyeRY = isChild ? 10.2 : 9.4;
+      // NARIZ HUMANA REALISTA (puente nasal vertical, punta y fosas nasales sutiles)
+      ctx.strokeStyle = 'rgba(115, 70, 44, 0.55)';
+      ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.moveTo(-1.8, -7);
+      ctx.lineTo(-2.2, 2.2);
+      ctx.quadraticCurveTo(0, 4.4, 2.5, 2.2);
+      ctx.stroke();
 
+      // Fosas nasales humanas
+      ctx.fillStyle = 'rgba(75, 42, 26, 0.65)';
+      ctx.beginPath();
+      ctx.ellipse(-2.3, 3.1, 1.3, 0.8, 0.2, 0, Math.PI * 2);
+      ctx.ellipse(2.3, 3.1, 1.3, 0.8, -0.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Brillo sutil del tabique nasal
+      ctx.strokeStyle = 'rgba(255, 245, 235, 0.45)';
+      ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      ctx.moveTo(0.2, -6.5);
+      ctx.lineTo(0.2, 1.5);
+      ctx.stroke();
+
+      // LABIOS HUMANOS REALISTAS
       if (sleeping) {
-        // Ojos cerrados durmiendo (arcos felices hacia abajo con pestañas)
-        ctx.strokeStyle = ink;
-        ctx.lineWidth = 3.3;
-        for (const ex of [-4.5, 8.8]) {
+        ctx.strokeStyle = '#7c3f38';
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.moveTo(-4.5, 11.5);
+        ctx.quadraticCurveTo(0, 12.2, 4.5, 11.5);
+        ctx.stroke();
+      } else if (mouthOpen) {
+        // Boca humana cantando
+        ctx.fillStyle = '#3b0a14';
+        ctx.beginPath();
+        ctx.ellipse(0, 12, 5.2, 3.6, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillRect(-3.8, 9.2, 7.6, 1.6);
+        ctx.strokeStyle = '#9f4a46';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.ellipse(0, 12, 5.2, 3.6, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      } else {
+        // Labio superior (arco de Cupido) e inferior realista
+        ctx.fillStyle = isFemale ? '#be4b58' : '#a85550';
+        ctx.beginPath();
+        ctx.moveTo(-6, 11.5);
+        ctx.quadraticCurveTo(-2.5, 10.0, 0, 10.8);
+        ctx.quadraticCurveTo(2.5, 10.0, 6, 11.5);
+        ctx.quadraticCurveTo(0, 14.2, -6, 11.5);
+        ctx.fill();
+
+        ctx.strokeStyle = 'rgba(70, 25, 25, 0.65)';
+        ctx.lineWidth = 1.1;
+        ctx.beginPath();
+        ctx.moveTo(-5.8, 11.6);
+        ctx.quadraticCurveTo(0, splitLip(smile), 5.8, 11.6);
+        ctx.stroke();
+      }
+
+      // OJOS HUMANOS REALISTAS (almendrados horizontales, separados anatómicamente)
+      const eyePositions = [-6.8, 6.8];
+      if (sleeping) {
+        ctx.strokeStyle = '#291a12';
+        ctx.lineWidth = 1.8;
+        for (const ex of eyePositions) {
           ctx.beginPath();
-          ctx.arc(ex, -7, 6.5, 0.15 * Math.PI, 0.85 * Math.PI);
+          ctx.moveTo(ex - 4.2, -5.5);
+          ctx.quadraticCurveTo(ex, -3.5, ex + 4.2, -5.5);
           ctx.stroke();
         }
       } else {
-        // Ojo izquierdo y derecho unidos
-        for (const [ex, tilt] of [[-4.5, -0.06], [8.8, 0.06]]) {
-          ctx.fillStyle = '#ffffff';
-          ctx.strokeStyle = ink;
-          ctx.lineWidth = 3.1;
+        for (const ex of eyePositions) {
+          // Sombra de cuenca ocular realista
+          ctx.fillStyle = 'rgba(65, 38, 26, 0.25)';
           ctx.beginPath();
-          ctx.ellipse(ex, -8, eyeRX, eyeRY, tilt, 0, Math.PI * 2);
+          ctx.ellipse(ex, -6, 5.2, 3.2, 0, 0, Math.PI * 2);
           ctx.fill();
-          ctx.stroke();
 
-          // Pupila grande cartoon con brillo blanco (pie-eye / catchlight)
+          // Esclerótica almendrada humana
+          ctx.fillStyle = '#f8fafc';
+          ctx.beginPath();
+          ctx.moveTo(ex - 4.4, -5.8);
+          ctx.quadraticCurveTo(ex, -8.5, ex + 4.4, -5.8);
+          ctx.quadraticCurveTo(ex, -3.3, ex - 4.4, -5.8);
+          ctx.closePath();
+          ctx.fill();
+
+          // Iris y pupila humana proporcional
           ctx.fillStyle = eyeColor;
           ctx.beginPath();
-          ctx.ellipse(ex + 1.4, -7.5, isChild ? 4.2 : 3.6, isChild ? 5.0 : 4.3, 0, 0, Math.PI * 2);
+          ctx.arc(ex, -5.8, 2.1, 0, Math.PI * 2);
           ctx.fill();
 
           ctx.fillStyle = '#09090b';
           ctx.beginPath();
-          ctx.arc(ex + 1.6, -7.5, isChild ? 2.3 : 2.0, 0, Math.PI * 2);
+          ctx.arc(ex, -5.8, 1.05, 0, Math.PI * 2);
           ctx.fill();
 
-          // Brillo blanco cartoon grande
-          ctx.fillStyle = '#ffffff';
+          // Reflejo corneal sutil
+          ctx.fillStyle = 'rgba(255,255,255,0.85)';
           ctx.beginPath();
-          ctx.arc(ex + 0.2, -10.2, 1.8, 0, Math.PI * 2);
+          ctx.arc(ex - 0.6, -6.4, 0.65, 0, Math.PI * 2);
           ctx.fill();
+
+          // Párpado superior / delineado rockero
+          ctx.strokeStyle = '#18110d';
+          ctx.lineWidth = isFemale ? 1.8 : 1.5;
+          ctx.beginPath();
+          ctx.moveTo(ex - 4.6, -5.7);
+          ctx.quadraticCurveTo(ex, -8.6, ex + 4.6, -5.7);
+          ctx.stroke();
         }
       }
 
-      // Pestañas si es niña (Pili) o fan mujer
-      if (isChild || isFemale) {
-        ctx.strokeStyle = ink;
-        ctx.lineWidth = 2.6;
+      // CEJAS HUMANAS REALISTAS ESPESAS
+      ctx.fillStyle = '#1f1610';
+      for (const [idx, ex] of eyePositions.entries()) {
+        const dir = idx === 0 ? -1 : 1;
         ctx.beginPath();
-        ctx.moveTo(-12, -14); ctx.lineTo(-15, -17);
-        ctx.moveTo(-10, -16); ctx.lineTo(-12, -20);
-        ctx.moveTo(15, -14); ctx.lineTo(18, -17);
-        ctx.moveTo(13, -16); ctx.lineTo(15, -20);
-        ctx.stroke();
+        ctx.moveTo(ex - 4.8, -9.8);
+        ctx.quadraticCurveTo(ex, -11.6, ex + 5.0, -9.6);
+        ctx.lineTo(ex + 4.6, -8.2);
+        ctx.quadraticCurveTo(ex, -9.8, ex - 4.5, -8.4);
+        ctx.closePath();
+        ctx.fill();
+        if (eyebrowSlit && dir === -1) {
+          ctx.strokeStyle = skinBase;
+          ctx.lineWidth = 1.6;
+          ctx.beginPath();
+          ctx.moveTo(ex - 2.6, -11.8);
+          ctx.lineTo(ex - 1.8, -8.0);
+          ctx.stroke();
+        }
       }
 
-      // Lentes de sol rockeros (para Pato) encima de los ojos pero dejando ver actitud cartoon
       if (sunglasses) {
         ctx.fillStyle = '#09090b';
-        ctx.strokeStyle = '#000000';
-        ctx.lineWidth = 3.2;
+        ctx.strokeStyle = '#27272a';
+        ctx.lineWidth = 1.6;
         ctx.beginPath();
-        ctx.roundRect(-16, -15, 18, 12.5, 3);
-        ctx.roundRect(4, -15, 18, 12.5, 3);
+        ctx.roundRect(-14.5, -10.5, 12.5, 7.8, 1.8);
+        ctx.roundRect(2.0, -10.5, 12.5, 7.8, 1.8);
         ctx.fill();
         ctx.stroke();
-
-        // Puente y patilla
-        ctx.lineWidth = 3.5;
-        ctx.beginPath();
-        ctx.moveTo(-24, -10);
-        ctx.lineTo(22, -10);
-        ctx.stroke();
-
-        // Reflejos blancos cartoon en los cristales
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
-        ctx.lineWidth = 2.6;
-        ctx.beginPath();
-        ctx.moveTo(-12, -12.5); ctx.lineTo(-6, -5.5);
-        ctx.moveTo(8, -12.5); ctx.lineTo(14, -5.5);
-        ctx.stroke();
-      }
-
-      // NARIZ REDONDA CARTOON ESTILO "THE LOUD HOUSE" (ubicada justo entre/debajo de los ojos)
-      ctx.fillStyle = skinShadow;
-      ctx.strokeStyle = ink;
-      ctx.lineWidth = 3.0;
-      ctx.beginPath();
-      ctx.moveTo(2, -4);
-      ctx.bezierCurveTo(12, -5, 13, 3.5, 2, 3.5);
-      ctx.fill();
-      ctx.stroke();
-
-      if (freckles) {
-        ctx.fillStyle = '#b4693c';
-        [[-11, 2], [-8, 4], [-13, 4], [15, 2], [17, 4]].forEach(([fx, fy]) => {
-          ctx.beginPath();
-          ctx.arc(fx, fy, 1.1, 0, Math.PI * 2);
-          ctx.fill();
-        });
-      }
-
-      // CEJAS EXPRESIVAS FLOTANTES ESTILO "THE LOUD HOUSE"
-      ctx.strokeStyle = '#271c15';
-      ctx.lineWidth = 3.8;
-      ctx.beginPath();
-      ctx.moveTo(-15, -20);
-      ctx.quadraticCurveTo(-6, -24, 0, -19);
-      ctx.moveTo(5, -19);
-      ctx.quadraticCurveTo(13, -24, 20, -19);
-      ctx.stroke();
-
-      if (eyebrowSlit) {
-        ctx.strokeStyle = skinBase;
-        ctx.lineWidth = 2.6;
-        ctx.beginPath();
-        ctx.moveTo(15, -24);
-        ctx.lineTo(16, -17);
-        ctx.stroke();
+        ctx.fillRect(-2.5, -8.8, 5, 2.2);
       }
 
       ctx.restore();
     }
 
+    function splitLip(smile) {
+      return smile ? 12.3 : 11.6;
+    }
+
+    // Alias para que cualquier referencia existente use la cabeza humana realista
+    const drawLoudCartoonHead = drawRealisticHumanHead;
+
     // ============================================================================
-    // 1. PATO SARDELLI (PROTAGONISTA - ESCALA GRANDE CARTOON LOUD HOUSE)
+    // 1. PATO SARDELLI (DISEÑO HUMANO REALISTA + CARA REAL EXACTA DE LA FOTO)
+    //    Basado en sus fotos reales: Gorra azul hacia atrás, pelo rubio/castaño largo
+    //    con trencita blanca/negra, remera NFL #96 negra, pantalón de cuero negro,
+    //    correa roja P.M.S. con medallones y Gibson Les Paul Heritage Cherry Sunburst.
     // ============================================================================
     function drawPatoHD(p) {
       ctx.save();
       ctx.translate(p.x, p.y);
       ctx.scale(CHAR_SCALE, CHAR_SCALE);
 
+      // Sombra proyectada en el escenario
       const shScale = Math.max(0.4, 1 - p.z / 240);
       ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
       ctx.beginPath();
-      ctx.ellipse(0, 0, 44 * shScale, 13 * shScale, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, 0, 38 * shScale, 11 * shScale, 0, 0, Math.PI * 2);
       ctx.fill();
 
       ctx.translate(0, -p.z / CHAR_SCALE);
@@ -960,295 +1002,322 @@
       if (!p.facingRight) ctx.scale(-1, 1);
 
       const isMoving = Math.abs(p.vx) > 0.1 || Math.abs(p.vy) > 0.1;
-      const walkSwing = isMoving ? Math.sin(p.walkCycle * 0.36) * 22 : 0;
-      const bounce = isMoving ? Math.abs(Math.sin(p.walkCycle * 0.36)) * 4.5 : Math.sin(Date.now() * 0.005) * 2;
+      const walkSwing = isMoving ? Math.sin(p.walkCycle * 0.34) * 20 : 0;
+      const bounce = isMoving ? Math.abs(Math.sin(p.walkCycle * 0.34)) * 3.2 : Math.sin(Date.now() * 0.004) * 1.2;
 
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
 
-      // Micrófono de pie cromado cruzado en la espalda (o en mano al atacar con K)
+      // Pie de micrófono cromado realista (en espalda o en mano al barrer con K)
       ctx.save();
       if (p.micSwingAnim > 0) {
-        ctx.translate(34, -76);
+        ctx.translate(32, -82);
         ctx.rotate((16 - p.micSwingAnim) * 0.13 - 0.45);
       } else {
-        ctx.translate(-18, -80 - bounce);
-        ctx.rotate(-0.55);
+        ctx.translate(-16, -84 - bounce);
+        ctx.rotate(-0.52);
       }
       ctx.fillStyle = '#1e293b';
       ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 3.2;
+      ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.ellipse(0, 62, 16, 6, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, 62, 14, 5, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
 
-      const chromeGrad = ctx.createLinearGradient(-4, 0, 4, 0);
-      chromeGrad.addColorStop(0, '#64748b');
+      const chromeGrad = ctx.createLinearGradient(-3, 0, 3, 0);
+      chromeGrad.addColorStop(0, '#475569');
       chromeGrad.addColorStop(0.5, '#f8fafc');
-      chromeGrad.addColorStop(1, '#334155');
+      chromeGrad.addColorStop(1, '#1e293b');
       ctx.fillStyle = chromeGrad;
-      ctx.fillRect(-3.5, -68, 7, 130);
-      ctx.strokeRect(-3.5, -68, 7, 130);
+      ctx.fillRect(-2.5, -68, 5, 130);
 
       ctx.fillStyle = '#cbd5e1';
       ctx.beginPath();
-      ctx.arc(0, -74, 9.5, 0, Math.PI * 2);
+      ctx.arc(0, -73, 7.5, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
       ctx.restore();
 
-      ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 3.4;
+      // ======================================================================
+      // PIERNAS HUMANAS REALISTAS CON PANTALÓN DE CUERO NEGRO Y BOTAS DE ROCK
+      // ======================================================================
+      for (const [legIdx, hipX] of [[-1, -9], [1, 9]]) {
+        ctx.save();
+        ctx.translate(hipX, -58);
+        ctx.rotate(legIdx * walkSwing * 0.024);
 
-      // Pierna izquierda
+        // Pantalón de cuero negro con brillo especular realista en muslo y rodilla
+        const leatherGrad = ctx.createLinearGradient(-8, 0, 8, 0);
+        leatherGrad.addColorStop(0, '#09090b');
+        leatherGrad.addColorStop(0.38, '#27272a');
+        leatherGrad.addColorStop(0.55, '#52525b');
+        leatherGrad.addColorStop(0.75, '#18181b');
+        leatherGrad.addColorStop(1, '#09090b');
+
+        ctx.fillStyle = leatherGrad;
+        ctx.strokeStyle = '#09090b';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.moveTo(-7.5, 0);
+        ctx.lineTo(7.5, 0);
+        ctx.lineTo(6.5, 26); // Rodilla
+        ctx.lineTo(5.8, 49); // Tobillo
+        ctx.lineTo(-5.8, 49);
+        ctx.lineTo(-6.5, 26);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Pliegues realistas del cuero en la rodilla
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.22)';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(-4, 24); ctx.lineTo(4, 25);
+        ctx.moveTo(-3, 27); ctx.lineTo(3, 28);
+        ctx.stroke();
+
+        // Bota de cuero negra rockera
+        ctx.fillStyle = '#09090b';
+        ctx.strokeStyle = '#27272a';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(-6.5, 45);
+        ctx.lineTo(6.5, 45);
+        ctx.lineTo(15.5, 53);
+        ctx.quadraticCurveTo(17, 58, 12, 58.5);
+        ctx.lineTo(-7, 58.5);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.restore();
+      }
+
+      // ======================================================================
+      // TORSO HUMANO ATLÉTICO REALISTA (CAMISETA NFL #96 NEGRA DE SU FOTO EN VIVO)
+      // ======================================================================
       ctx.save();
-      ctx.translate(-8, -48);
-      ctx.rotate(-walkSwing * 0.028);
-      ctx.fillStyle = '#18181b';
-      ctx.beginPath();
-      ctx.roundRect(-7, 0, 14, 42, 5);
-      ctx.fill();
-      ctx.stroke();
-      // Zapatilla grande cartoon tipo Converse/Vans
-      ctx.fillStyle = '#09090b';
-      ctx.beginPath();
-      ctx.roundRect(-8, 37, 26, 12, 5);
-      ctx.fill();
-      ctx.stroke();
-      ctx.fillStyle = '#f8fafc';
-      ctx.fillRect(-8, 45, 26, 3.5);
-      ctx.restore();
+      ctx.translate(0, -58 - bounce);
 
-      // Pierna derecha + pañuelo azul colgando
+      // Brazo izquierdo humano sosteniendo el mástil de la Gibson Les Paul
       ctx.save();
-      ctx.translate(8, -48);
-      ctx.rotate(walkSwing * 0.028);
-      ctx.fillStyle = '#27272a';
-      ctx.beginPath();
-      ctx.roundRect(-7, 0, 14, 42, 5);
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.fillStyle = '#1d4ed8';
+      // Manga larga negra debajo de la camiseta #96
+      ctx.fillStyle = '#111827';
       ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 3;
+      ctx.lineWidth = 1.8;
       ctx.beginPath();
-      ctx.moveTo(-5, 2);
-      ctx.quadraticCurveTo(-20, 18, -14, 31);
-      ctx.lineTo(-2, 25);
+      ctx.moveTo(16, -54);
+      ctx.quadraticCurveTo(32, -46, 44, -30);
+      ctx.quadraticCurveTo(37, -20, 15, -34);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
 
-      ctx.fillStyle = '#09090b';
+      // Mano humana realista con dedos y anillos en el diapasón
+      ctx.fillStyle = '#e8be9e';
       ctx.beginPath();
-      ctx.roundRect(-8, 37, 26, 12, 5);
+      ctx.ellipse(44, -27, 5.5, 4.5, -0.3, 0, Math.PI * 2);
       ctx.fill();
-      ctx.stroke();
-      ctx.fillStyle = '#f8fafc';
-      ctx.fillRect(-8, 45, 26, 3.5);
-      ctx.restore();
-
-      // Torso (Musculosa negra rockera + Gibson Les Paul + Cabeza Grande Cartoon)
-      ctx.save();
-      ctx.translate(0, -48 - bounce);
-
-      // Brazo izquierdo sosteniendo el mástil
-      ctx.save();
-      ctx.fillStyle = '#fbd3b0';
-      ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 3.4;
+      // Anillo plateado como en la foto 2
+      ctx.strokeStyle = '#f8fafc';
+      ctx.lineWidth = 1.4;
       ctx.beginPath();
-      ctx.moveTo(10, -50);
-      ctx.quadraticCurveTo(30, -46, 42, -30);
-      ctx.quadraticCurveTo(34, -18, 12, -32);
-      ctx.closePath();
-      ctx.fill();
+      ctx.moveTo(43, -29); ctx.lineTo(45, -26);
       ctx.stroke();
       ctx.restore();
 
-      // Musculosa negra
-      const shirtGrad = ctx.createLinearGradient(-18, -54, 18, 0);
-      shirtGrad.addColorStop(0, '#27272a');
-      shirtGrad.addColorStop(0.5, '#18181b');
-      shirtGrad.addColorStop(1, '#09090b');
-      ctx.fillStyle = shirtGrad;
+      // Torso con camiseta negra #96 de hombros anchos realistas
+      const jerseyGrad = ctx.createLinearGradient(-24, -60, 24, 2);
+      jerseyGrad.addColorStop(0, '#1e293b');
+      jerseyGrad.addColorStop(0.3, '#0f172a');
+      jerseyGrad.addColorStop(1, '#09090b');
+      ctx.fillStyle = jerseyGrad;
       ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 3.4;
+      ctx.lineWidth = 2.0;
+
       ctx.beginPath();
-      ctx.moveTo(-17, -54);
-      ctx.lineTo(-9, -54);
-      ctx.quadraticCurveTo(0, -42, 9, -54);
-      ctx.lineTo(17, -54);
-      ctx.lineTo(15, 2);
-      ctx.lineTo(-15, 2);
+      ctx.moveTo(-23, -55); // Hombro izquierdo
+      ctx.quadraticCurveTo(-12, -60, 0, -58);
+      ctx.quadraticCurveTo(12, -60, 23, -55); // Hombro derecho
+      ctx.lineTo(26, -34); // Manga caída
+      ctx.lineTo(18, -31);
+      ctx.lineTo(16, 4); // Cintura derecha
+      ctx.lineTo(-16, 4); // Cintura izquierda
+      ctx.lineTo(-18, -31);
+      ctx.lineTo(-26, -34);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
 
-      // Correa roja de cuero con medallones "P.M.S"
-      const strapGrad = ctx.createLinearGradient(-8, -54, 12, -8);
-      strapGrad.addColorStop(0, '#ef4444');
-      strapGrad.addColorStop(0.5, '#dc2626');
-      strapGrad.addColorStop(1, '#991b1b');
+      // Cuello en V con escudo plateado tipo NFL (Foto #2)
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-9, -58);
+      ctx.lineTo(0, -47);
+      ctx.lineTo(9, -58);
+      ctx.stroke();
+
+      ctx.fillStyle = '#e2e8f0';
+      ctx.beginPath();
+      ctx.roundRect(-2.2, -49, 4.4, 4.8, 1);
+      ctx.fill();
+
+      // Número "96" blanco grande en el pecho (exacto a la foto 2 de Pato)
+      ctx.font = '900 22px "Montserrat"';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = 'rgba(241, 245, 249, 0.92)';
+      ctx.strokeStyle = '#09090b';
+      ctx.lineWidth = 2.5;
+      ctx.strokeText('96', 0, -22);
+      ctx.fillText('96', 0, -22);
+
+      // Correa de cuero roja ancha con medallones plateados "P.M.S" (Foto #2)
+      const strapGrad = ctx.createLinearGradient(-10, -58, 14, -4);
+      strapGrad.addColorStop(0, '#b91c1c');
+      strapGrad.addColorStop(0.5, '#991b1b');
+      strapGrad.addColorStop(1, '#7f1d1d');
       ctx.fillStyle = strapGrad;
-      ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 2.8;
-      ctx.beginPath();
-      ctx.moveTo(-6, -54);
-      ctx.lineTo(6, -54);
-      ctx.lineTo(14, -6);
-      ctx.lineTo(2, -6);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.fillStyle = '#f8fafc';
       ctx.strokeStyle = '#18181b';
       ctx.lineWidth = 1.6;
-      for (let m = 0; m < 3; m++) {
+      ctx.beginPath();
+      ctx.moveTo(6, -58);
+      ctx.lineTo(15, -56);
+      ctx.lineTo(-2, -4);
+      ctx.lineTo(-10, -6);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Medallones metálicos circulares en la correa roja
+      ctx.fillStyle = '#e2e8f0';
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 1.2;
+      for (let m = 0; m < 4; m++) {
+        const mx = 9 - m * 4.2;
+        const my = -50 + m * 12;
         ctx.beginPath();
-        ctx.arc(1 + m * 2.5, -44 + m * 12, 3.2, 0, Math.PI * 2);
+        ctx.arc(mx, my, 2.8, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
       }
 
-      // Guitarra Gibson Les Paul Cherry Sunburst
+      // ======================================================================
+      // GUITARRA GIBSON LES PAUL HERITAGE CHERRY SUNBURST REALISTA (FOTO #2)
+      // ======================================================================
       ctx.save();
-      const strumTilt = p.guitarStrumAnim > 0 ? Math.sin(p.guitarStrumAnim * 1.6) * 0.1 : 0;
-      ctx.translate(10, -19);
-      ctx.rotate(-0.4 + strumTilt);
+      const strumTilt = p.guitarStrumAnim > 0 ? Math.sin(p.guitarStrumAnim * 1.6) * 0.08 : 0;
+      ctx.translate(6, -14);
+      ctx.rotate(-0.42 + strumTilt);
 
-      const lpGrad = ctx.createRadialGradient(-4, 2, 3, -4, 2, 26);
-      lpGrad.addColorStop(0, '#fef08a');
-      lpGrad.addColorStop(0.45, '#f59e0b');
-      lpGrad.addColorStop(0.8, '#dc2626');
-      lpGrad.addColorStop(1, '#7f1d1d');
+      const lpGrad = ctx.createRadialGradient(-4, 2, 2, -4, 2, 27);
+      lpGrad.addColorStop(0, '#fde047');
+      lpGrad.addColorStop(0.42, '#ea580c');
+      lpGrad.addColorStop(0.78, '#991b1b');
+      lpGrad.addColorStop(1, '#450a0a');
 
       ctx.fillStyle = lpGrad;
-      ctx.strokeStyle = '#fef3c7';
-      ctx.lineWidth = 4.5;
-      ctx.beginPath();
-      ctx.moveTo(-25, -7);
-      ctx.bezierCurveTo(-29, -20, -7, -20, 0, -11);
-      ctx.bezierCurveTo(7, -4, 17, -15, 22, -4);
-      ctx.bezierCurveTo(26, 6, 17, 17, 2, 13);
-      ctx.bezierCurveTo(-7, 20, -27, 18, -25, -7);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.strokeStyle = '#09090b';
+      ctx.strokeStyle = '#fef3c7'; // Cenefa crema (binding) de la Les Paul
       ctx.lineWidth = 2.6;
-      ctx.stroke();
-
-      // Mástil y clavijero
-      ctx.fillStyle = '#451a03';
-      ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 2.8;
-      ctx.fillRect(19, -4.5, 44, 8);
-      ctx.strokeRect(19, -4.5, 44, 8);
-
-      ctx.fillStyle = '#09090b';
       ctx.beginPath();
-      ctx.roundRect(62, -6.5, 14, 12, 2);
-      ctx.fill();
-      ctx.stroke();
-
-      // Pastillas humbucker
-      ctx.fillStyle = '#cbd5e1';
-      ctx.fillRect(2, -4, 7, 8);
-      ctx.strokeRect(2, -4, 7, 8);
-      ctx.fillRect(11, -4, 7, 8);
-      ctx.strokeRect(11, -4, 7, 8);
-      ctx.restore();
-
-      // Brazo derecho rasgueando con tatuaje "fasa"
-      ctx.save();
-      ctx.translate(-12, -46);
-      const strumArm = p.guitarStrumAnim > 0 ? Math.sin(p.guitarStrumAnim * 2.2) * 0.35 : 0.08;
-      ctx.rotate(strumArm);
-      ctx.fillStyle = '#fbd3b0';
-      ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 3.2;
-      ctx.beginPath();
-      ctx.roundRect(-6, 0, 13, 23, 6);
-      ctx.fill();
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.roundRect(-3, 17, 25, 11, 5);
-      ctx.fill();
-      ctx.stroke();
-      ctx.font = 'italic 700 6px "Montserrat"';
-      ctx.fillStyle = 'rgba(24, 24, 27, 0.8)';
-      ctx.fillText('fasa', 4, 24);
-      ctx.restore();
-
-      // CABEZA GRANDE CARTOON DE PATO (proporción Loud House 1.28x en cabeza)
-      ctx.save();
-      ctx.translate(2, -88);
-      ctx.scale(1.26, 1.26);
-
-      const hairGrad = ctx.createLinearGradient(-24, -38, 18, 36);
-      hairGrad.addColorStop(0, '#d4af73');
-      hairGrad.addColorStop(0.55, '#9c7040');
-      hairGrad.addColorStop(1, '#614020');
-
-      // Pelo trasero con volumen cartoon
-      ctx.fillStyle = hairGrad;
-      ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 3.4;
-      ctx.beginPath();
-      ctx.moveTo(-22, -22);
-      ctx.bezierCurveTo(-36, -2, -36, 20, -24, 36);
-      ctx.quadraticCurveTo(-14, 32, -10, 18);
+      ctx.moveTo(-26, -7);
+      ctx.bezierCurveTo(-30, -21, -7, -21, 0, -11);
+      ctx.bezierCurveTo(7, -4, 18, -15, 23, -4);
+      ctx.bezierCurveTo(27, 6, 18, 17, 2, 13);
+      ctx.bezierCurveTo(-7, 21, -28, 18, -26, -7);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
 
-      drawLoudCartoonHead(ctx, {
-        hasBeard: true,
-        beardStyle: 'pato',
-        sunglasses: true,
-        mouthOpen: p.guitarStrumAnim > 0 || p.micSwingAnim > 0,
-        smile: true
+      // Marcos crema de micrófonos Humbucker + bobinas negras
+      for (const hx of [2, 11.5]) {
+        ctx.fillStyle = '#18181b';
+        ctx.strokeStyle = '#fef3c7';
+        ctx.lineWidth = 1.3;
+        ctx.fillRect(hx, -4.5, 6.8, 9);
+        ctx.strokeRect(hx, -4.5, 6.8, 9);
+      }
+
+      // Puente Tune-o-matic cromado y 4 perillas doradas
+      ctx.fillStyle = '#e2e8f0';
+      ctx.fillRect(-6, -5, 2.5, 10);
+      ctx.fillRect(-11, -5, 2.2, 10);
+      ctx.fillStyle = '#f59e0b';
+      [[-12, 8], [-6, 9], [-12, 13], [-6, 14]].forEach(([kx, ky]) => {
+        ctx.beginPath();
+        ctx.arc(kx, ky, 1.7, 0, Math.PI * 2);
+        ctx.fill();
       });
 
-      // Flequillo partido al medio con volumen estilo cartoon moderno
-      ctx.fillStyle = hairGrad;
-      ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 3.4;
+      // Diapasón de palorrosa con inlays trapezoidales y cenefa crema
+      ctx.fillStyle = '#3b190b';
+      ctx.strokeStyle = '#fef3c7';
+      ctx.lineWidth = 1.2;
+      ctx.fillRect(20, -4, 46, 7.5);
+      ctx.strokeRect(20, -4, 46, 7.5);
+
+      ctx.fillStyle = '#e2e8f0';
+      for (let tr = 24; tr < 62; tr += 7) {
+        ctx.fillRect(tr, -2.5, 2.2, 4.5);
+      }
+
+      // Clavijero negro Gibson ("open book")
+      ctx.fillStyle = '#09090b';
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.moveTo(-25, -12);
-      ctx.bezierCurveTo(-28, -42, 22, -42, 25, -13);
-      ctx.quadraticCurveTo(12, -27, 0, -22);
-      ctx.quadraticCurveTo(-12, -27, -25, -12);
-      ctx.closePath();
+      ctx.roundRect(66, -6, 14, 11.5, 1.5);
       ctx.fill();
       ctx.stroke();
-
-      // Trencita característica con gomita roja
-      ctx.fillStyle = hairGrad;
-      ctx.beginPath();
-      ctx.moveTo(-18, 4);
-      ctx.bezierCurveTo(-26, 18, -24, 34, -17, 45);
-      ctx.bezierCurveTo(-10, 34, -11, 18, -13, 4);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.fillStyle = '#ef4444';
-      ctx.fillRect(-21, 10, 8, 4);
-      ctx.strokeRect(-21, 10, 8, 4);
-
       ctx.restore();
+
+      // Brazo derecho humano rasgueando (con manga negra y mano realista)
+      ctx.save();
+      ctx.translate(-17, -48);
+      const strumArm = p.guitarStrumAnim > 0 ? Math.sin(p.guitarStrumAnim * 2.2) * 0.3 : 0.06;
+      ctx.rotate(strumArm);
+      ctx.fillStyle = '#111827';
+      ctx.strokeStyle = '#09090b';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.roundRect(-5.5, 0, 11, 24, 5);
+      ctx.fill();
+      ctx.stroke();
+
+      // Antebrazo y mano derecha con púa
+      ctx.fillStyle = '#e8be9e';
+      ctx.beginPath();
+      ctx.roundRect(-2, 19, 20, 8.5, 4);
+      ctx.fill();
+      ctx.font = 'italic 700 5px "Montserrat"';
+      ctx.fillStyle = 'rgba(24, 24, 27, 0.75)';
+      ctx.fillText('Blasa', 2, 25);
+      ctx.restore();
+
+      // ======================================================================
+      // CABEZA DE PATO SARDELLI CON SU CARA REAL EXACTA (pato_face.png)
+      // Y PROPORCIÓN HUMANA REALISTA
+      // ======================================================================
+      ctx.save();
+      ctx.translate(0, -82);
+      ctx.scale(0.95, 0.95);
+      drawRealisticHumanHead(ctx, {
+        photoKey: 'pato',
+        hasBeard: true,
+        beardStyle: 'pato',
+        eyebrowSlit: true,
+        mouthOpen: p.guitarStrumAnim > 0 || p.micSwingAnim > 0,
+        smile: false
+      });
+      ctx.restore();
+
       ctx.restore();
       ctx.restore();
     }
 
     // ============================================================================
-    // 2. GUIDO SARDELLI (JEFE NIVEL 1 - GORRA HACIA ATRÁS, REY DEL SINTETIZADOR)
+    // 2. GUIDO SARDELLI (JEFE NIVEL 1 - DISEÑO HUMANO REALISTA, NO CARTOON)
     // ============================================================================
     function drawGuidoHD(b) {
       ctx.save();
@@ -1257,134 +1326,147 @@
 
       ctx.fillStyle = 'rgba(0,0,0,0.55)';
       ctx.beginPath();
-      ctx.ellipse(0, 0, 75, 18, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, 0, 72, 16, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      const groove = Math.sin(b.anim * 0.22) * 4.5;
+      const groove = Math.sin(b.anim * 0.2) * 3.0;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
-      ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 3.4;
 
-      // Piernas
-      ctx.fillStyle = '#18181b';
-      ctx.fillRect(-18, -48, 13, 44);
-      ctx.fillRect(5, -48, 13, 44);
-      ctx.strokeRect(-18, -48, 13, 44);
-      ctx.strokeRect(5, -48, 13, 44);
+      // Piernas humanas realistas con pantalón oscuro y botas
+      for (const lx of [-13, 6]) {
+        ctx.fillStyle = '#18181b';
+        ctx.strokeStyle = '#09090b';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.roundRect(lx, -56, 11, 50, 4);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#09090b';
+        ctx.beginPath();
+        ctx.roundRect(lx - 2, -9, 15, 9, 3);
+        ctx.fill();
+      }
 
       ctx.save();
-      ctx.translate(0, -48 - groove);
+      ctx.translate(0, -56 - groove);
 
-      // Remera deportiva negra #10 oversize
-      const jerseyGrad = ctx.createLinearGradient(-32, -56, 32, 0);
+      // Torso humano realista con remera deportiva negra #10
+      const jerseyGrad = ctx.createLinearGradient(-24, -56, 24, 0);
       jerseyGrad.addColorStop(0, '#27272a');
       jerseyGrad.addColorStop(1, '#09090b');
       ctx.fillStyle = jerseyGrad;
-      ctx.beginPath();
-      ctx.roundRect(-30, -56, 60, 56, 10);
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(-30, -34, 14, 4);
-      ctx.fillRect(-30, -27, 14, 4);
-      ctx.fillRect(16, -34, 14, 4);
-      ctx.fillRect(16, -27, 14, 4);
-
-      ctx.font = '900 20px "Montserrat"';
-      ctx.fillStyle = '#f8fafc';
-      ctx.textAlign = 'center';
-      ctx.fillText('10', 0, -22);
-
-      // Cabeza grande cartoon de Guido
-      ctx.save();
-      ctx.translate(0, -88);
-      ctx.scale(-1.26, 1.26);
-
-      // Colita rubia baja
-      ctx.fillStyle = '#d4af73';
       ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 3.2;
+      ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(-20, 2);
-      ctx.quadraticCurveTo(-32, 16, -22, 34);
-      ctx.quadraticCurveTo(-13, 24, -13, 4);
+      ctx.moveTo(-22, -54);
+      ctx.lineTo(22, -54);
+      ctx.lineTo(26, -32);
+      ctx.lineTo(18, -30);
+      ctx.lineTo(16, 4);
+      ctx.lineTo(-16, 4);
+      ctx.lineTo(-18, -30);
+      ctx.lineTo(-26, -32);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
 
-      drawLoudCartoonHead(ctx, {
+      // Brazos humanos tocando el sintetizador
+      ctx.fillStyle = '#e8be9e';
+      ctx.beginPath();
+      ctx.roundRect(-25, -32, 8, 22, 4);
+      ctx.roundRect(17, -32, 8, 22, 4);
+      ctx.fill();
+
+      ctx.font = '900 18px "Montserrat"';
+      ctx.fillStyle = '#f8fafc';
+      ctx.textAlign = 'center';
+      ctx.fillText('10', 0, -24);
+
+      // Cabeza humana proporcionada de Guido (no cabezón cartoon)
+      ctx.save();
+      ctx.translate(0, -78);
+      ctx.scale(-0.92, 0.92);
+
+      // Pelo rubio/castaño atado atrás
+      ctx.fillStyle = '#b89352';
+      ctx.beginPath();
+      ctx.moveTo(-14, 0);
+      ctx.quadraticCurveTo(-24, 12, -18, 26);
+      ctx.quadraticCurveTo(-10, 18, -10, 2);
+      ctx.closePath();
+      ctx.fill();
+
+      drawRealisticHumanHead(ctx, {
+        photoKey: 'guido',
         hasBeard: true,
         beardStyle: 'guido',
         sunglasses: false,
-        mouthOpen: !b.defeated && Math.sin(b.anim * 0.2) > 0.2,
-        smile: !b.defeated,
+        mouthOpen: !b.defeated && Math.sin(b.anim * 0.2) > 0.25,
+        smile: false,
         eyebrowSlit: true
       });
 
-      // Gorra negra puesta hacia atrás estilo cartoon
-      ctx.fillStyle = '#18181b';
-      ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 3.4;
-      ctx.beginPath();
-      ctx.arc(0, -20, 25, Math.PI * 0.96, Math.PI * 2.04);
-      ctx.fill();
-      ctx.stroke();
+      if (!CHAR_FACES.guido.ready) {
+        // Gorra hacia atrás proporcionada realista
+        ctx.fillStyle = '#18181b';
+        ctx.strokeStyle = '#09090b';
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.arc(0, -16, 17.5, Math.PI * 0.96, Math.PI * 2.04);
+        ctx.fill();
+        ctx.stroke();
 
-      // Hueco de ajuste en la frente y mechón rubio
-      ctx.fillStyle = '#fde68a';
-      ctx.beginPath();
-      ctx.arc(7, -20, 7.5, Math.PI, 0);
-      ctx.fill();
-      ctx.stroke();
-      ctx.fillStyle = '#18181b';
-      ctx.fillRect(-1, -22, 16, 4);
-      ctx.strokeRect(-1, -22, 16, 4);
+        ctx.fillStyle = '#d4af73';
+        ctx.beginPath();
+        ctx.arc(4, -16, 5.2, Math.PI, 0);
+        ctx.fill();
+        ctx.fillStyle = '#18181b';
+        ctx.fillRect(-1, -17.5, 11, 2.8);
 
-      // Visera hacia atrás
-      ctx.fillStyle = '#09090b';
-      ctx.beginPath();
-      ctx.roundRect(-39, -24, 18, 8, 4);
-      ctx.fill();
-      ctx.stroke();
+        // Visera hacia atrás
+        ctx.fillStyle = '#09090b';
+        ctx.beginPath();
+        ctx.roundRect(-27, -19, 12, 5, 2.5);
+        ctx.fill();
+      }
 
       ctx.restore();
       ctx.restore();
 
-      // Teclado / Sintetizador Rojo Rockero en primer plano
+      // Sintetizador / Teclado Nord Stage Rojo realista en primer plano
       ctx.strokeStyle = '#94a3b8';
-      ctx.lineWidth = 6;
+      ctx.lineWidth = 4.5;
       ctx.beginPath();
-      ctx.moveTo(-45, -4); ctx.lineTo(35, -70);
-      ctx.moveTo(35, -4); ctx.lineTo(-45, -70);
+      ctx.moveTo(-42, -4); ctx.lineTo(32, -70);
+      ctx.moveTo(32, -4); ctx.lineTo(-42, -70);
       ctx.stroke();
 
-      const synthGrad = ctx.createLinearGradient(-66, -80, 56, -54);
-      synthGrad.addColorStop(0, '#dc2626');
-      synthGrad.addColorStop(0.5, '#ef4444');
-      synthGrad.addColorStop(1, '#991b1b');
+      const synthGrad = ctx.createLinearGradient(-64, -80, 54, -56);
+      synthGrad.addColorStop(0, '#b91c1c');
+      synthGrad.addColorStop(0.5, '#dc2626');
+      synthGrad.addColorStop(1, '#7f1d1d');
       ctx.fillStyle = synthGrad;
       ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 3.5;
+      ctx.lineWidth = 2.4;
       ctx.beginPath();
-      ctx.roundRect(-66, -78, 122, 26, 6);
+      ctx.roundRect(-64, -78, 118, 24, 4);
       ctx.fill();
       ctx.stroke();
 
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(-58, -68, 104, 13);
-      ctx.strokeRect(-58, -68, 104, 13);
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(-56, -68, 102, 11);
       ctx.fillStyle = '#09090b';
-      for (let k = -52; k < 40; k += 9) {
-        ctx.fillRect(k, -68, 4.5, 8);
+      for (let k = -50; k < 40; k += 8) {
+        ctx.fillRect(k, -68, 3.8, 6.8);
       }
 
       ctx.restore();
     }
 
     // ============================================================================
-    // 3. GASTÓN SARDELLI (JEFE NIVEL 2 - MELENA RUBIA CARTOON Y BULLS #31)
+    // 3. GASTÓN SARDELLI (JEFE NIVEL 2 - DISEÑO HUMANO REALISTA, NO CARTOON)
     // ============================================================================
     function drawGastonHD(b) {
       ctx.save();
@@ -1394,127 +1476,125 @@
       const shScale = Math.max(0.35, 1 - b.z / 240);
       ctx.fillStyle = 'rgba(0,0,0,0.55)';
       ctx.beginPath();
-      ctx.ellipse(0, 0, 46 * shScale, 14 * shScale, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, 0, 40 * shScale, 12 * shScale, 0, 0, Math.PI * 2);
       ctx.fill();
 
       ctx.translate(0, -b.z / CHAR_SCALE);
       if (!b.facingRight) ctx.scale(-1, 1);
 
-      const bounce = Math.sin(b.anim * 0.25) * 5;
-      const jumpSpread = b.z > 20 ? 0.35 : Math.sin(b.anim * 0.25) * 0.12;
+      const bounce = Math.sin(b.anim * 0.24) * 3.5;
+      const jumpSpread = b.z > 20 ? 0.28 : Math.sin(b.anim * 0.24) * 0.1;
 
-      ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 3.4;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
 
-      // Piernas con bermudas y zapatillas Bulls
+      // Piernas humanas realistas con bermudas deportivas y zapatillas Bulls
       for (let side of [-1, 1]) {
         ctx.save();
-        ctx.translate(side * 10, -48);
+        ctx.translate(side * 9, -56);
         ctx.rotate(side * jumpSpread);
-        ctx.fillStyle = '#fbd3b0';
-        ctx.fillRect(-5.5, 16, 11, 24);
-        ctx.strokeRect(-5.5, 16, 11, 24);
+        // Pantorrilla humana
+        ctx.fillStyle = '#e8be9e';
+        ctx.fillRect(-4.5, 22, 9, 26);
+        // Bermuda negra deportiva
         ctx.fillStyle = '#18181b';
+        ctx.strokeStyle = '#09090b';
+        ctx.lineWidth = 1.6;
         ctx.beginPath();
-        ctx.roundRect(-11, -2, 22, 22, 4);
+        ctx.roundRect(-8.5, -2, 17, 26, 3);
         ctx.fill();
         ctx.stroke();
+        // Zapatilla deportiva roja y negra
         ctx.fillStyle = '#dc2626';
         ctx.beginPath();
-        ctx.roundRect(-8, 36, 25, 12, 5);
+        ctx.roundRect(-6, 44, 19, 10, 4);
         ctx.fill();
         ctx.stroke();
         ctx.fillStyle = '#ffffff';
-        ctx.fillRect(-8, 44, 25, 3.5);
+        ctx.fillRect(-6, 51, 19, 2.8);
         ctx.restore();
       }
 
       ctx.save();
-      ctx.translate(0, -48 - bounce);
+      ctx.translate(0, -56 - bounce);
 
-      // Musculosa BULLS #31
-      ctx.fillStyle = '#dc2626';
+      // Brazos humanos atléticos
+      ctx.fillStyle = '#e8be9e';
+      ctx.strokeStyle = '#b48364';
+      ctx.lineWidth = 1.2;
       ctx.beginPath();
-      ctx.roundRect(-30, -54, 60, 28, 8);
+      ctx.roundRect(-27, -50, 9, 32, 4.5);
+      ctx.roundRect(18, -50, 9, 32, 4.5);
       ctx.fill();
       ctx.stroke();
 
-      ctx.fillStyle = '#18181b';
+      // Camiseta Chicago Bulls #31 con proporciones humanas realistas
+      const bullsGrad = ctx.createLinearGradient(-20, -56, 20, 2);
+      bullsGrad.addColorStop(0, '#dc2626');
+      bullsGrad.addColorStop(1, '#991b1b');
+      ctx.fillStyle = bullsGrad;
+      ctx.strokeStyle = '#09090b';
+      ctx.lineWidth = 1.8;
       ctx.beginPath();
-      ctx.roundRect(-21, -36, 42, 38, 4);
+      ctx.roundRect(-19, -54, 38, 56, 5);
       ctx.fill();
       ctx.stroke();
 
-      ctx.font = '900 12px "Montserrat"';
+      ctx.font = '900 10px "Montserrat"';
       ctx.textAlign = 'center';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText('BULLS', 0, -30);
+
+      ctx.font = '900 16px "Montserrat"';
+      ctx.fillStyle = '#18181b';
       ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 3;
-      ctx.strokeText('BULLS', 0, -21);
-      ctx.fillStyle = '#dc2626';
-      ctx.fillText('BULLS', 0, -21);
+      ctx.lineWidth = 2;
+      ctx.strokeText('31', 0, -12);
+      ctx.fillText('31', 0, -12);
 
-      ctx.font = '900 13px "Montserrat"';
-      ctx.strokeText('31', 0, -6);
-      ctx.fillText('31', 0, -6);
-
-      // Brazos
-      ctx.fillStyle = '#fbd3b0';
-      ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 3.2;
-      ctx.beginPath();
-      ctx.roundRect(-44, -46, 20, 11, 5);
-      ctx.roundRect(24, -46, 20, 11, 5);
-      ctx.fill();
-      ctx.stroke();
-
-      // Cabeza grande cartoon de Gastón con melena rubia unificada tipo nube/rulos cartoon
+      // Cabeza humana realista de Gastón con melena rubia rockera natural
       ctx.save();
-      ctx.translate(0, -88);
-      ctx.scale(1.26, 1.26);
+      ctx.translate(0, -78);
+      ctx.scale(0.92, 0.92);
 
-      const curlGrad = ctx.createRadialGradient(0, -12, 6, 0, -6, 38);
-      curlGrad.addColorStop(0, '#fef08a');
-      curlGrad.addColorStop(0.55, '#eab308');
-      curlGrad.addColorStop(1, '#a16207');
+      if (!CHAR_FACES.gaston.ready) {
+        const hairGrad = ctx.createLinearGradient(-22, -28, 22, 28);
+        hairGrad.addColorStop(0, '#fde047');
+        hairGrad.addColorStop(0.5, '#ca8a04');
+        hairGrad.addColorStop(1, '#854d0e');
 
-      // Silueta exterior continua de melena enrulada estilo The Loud House (sin circulitos sueltos)
-      ctx.fillStyle = curlGrad;
-      ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 3.5;
-      ctx.beginPath();
-      ctx.moveTo(-26, 14);
-      ctx.bezierCurveTo(-38, 10, -40, -8, -30, -18);
-      ctx.bezierCurveTo(-34, -32, -16, -42, -4, -36);
-      ctx.bezierCurveTo(6, -44, 24, -38, 26, -24);
-      ctx.bezierCurveTo(38, -16, 36, 4, 26, 12);
-      ctx.bezierCurveTo(30, 24, 16, 30, 8, 22);
-      ctx.lineTo(-10, 22);
-      ctx.bezierCurveTo(-20, 30, -32, 24, -26, 14);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
+        // Melena rubia ondulada cayendo sobre los hombros
+        ctx.fillStyle = hairGrad;
+        ctx.beginPath();
+        ctx.moveTo(-18, -22);
+        ctx.bezierCurveTo(-26, -6, -27, 16, -20, 28);
+        ctx.lineTo(20, 28);
+        ctx.bezierCurveTo(27, 16, 26, -6, 18, -22);
+        ctx.bezierCurveTo(10, -32, -10, -32, -18, -22);
+        ctx.closePath();
+        ctx.fill();
+      }
 
-      drawLoudCartoonHead(ctx, {
-        hasBeard: false,
+      drawRealisticHumanHead(ctx, {
+        photoKey: 'gaston',
+        hasBeard: true,
+        beardStyle: 'gaston',
         sunglasses: false,
-        mouthOpen: b.z > 20 || Math.sin(b.anim * 0.18) > 0.3,
-        smile: !b.defeated
+        mouthOpen: b.z > 20 || Math.sin(b.anim * 0.18) > 0.35,
+        smile: false
       });
 
-      // Rulos superiores sobre la frente (silueta limpia)
-      ctx.fillStyle = curlGrad;
-      ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 3.2;
-      ctx.beginPath();
-      ctx.moveTo(-24, -14);
-      ctx.bezierCurveTo(-24, -32, -6, -34, 0, -24);
-      ctx.bezierCurveTo(8, -34, 24, -30, 23, -14);
-      ctx.bezierCurveTo(12, -21, -10, -21, -24, -14);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
+      if (!CHAR_FACES.gaston.ready) {
+        // Mechones rubios superiores con raya al medio realista
+        ctx.fillStyle = '#eab308';
+        ctx.beginPath();
+        ctx.moveTo(-17, -14);
+        ctx.bezierCurveTo(-16, -29, 0, -28, 0, -19);
+        ctx.bezierCurveTo(0, -28, 16, -29, 17, -14);
+        ctx.quadraticCurveTo(8, -22, 0, -18);
+        ctx.quadraticCurveTo(-8, -22, -17, -14);
+        ctx.fill();
+      }
 
       ctx.restore();
       ctx.restore();
@@ -1522,7 +1602,7 @@
     }
 
     // ============================================================================
-    // 4. PILI (8 AÑOS - PROPORCIÓN NIÑA ESTILO LOLA / LANA / LUCY DE LOUD HOUSE)
+    // 4. PILI (8 AÑOS - PROPORCIÓN HUMANA REALISTA DE NIÑA, NO CARTOON)
     // ============================================================================
     function drawPiliHD(p) {
       ctx.save();
@@ -1552,124 +1632,122 @@
       ctx.fill();
 
       ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 3.2;
+      ctx.lineWidth = 2.0;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
 
       // Silla de madera en el escenario
       ctx.fillStyle = '#7c2d12';
       ctx.beginPath();
-      ctx.roundRect(-24, -68, 48, 9, 3);
-      ctx.roundRect(-24, -32, 48, 7, 3);
+      ctx.roundRect(-22, -68, 44, 8, 2);
+      ctx.roundRect(-22, -32, 44, 6, 2);
       ctx.fill();
       ctx.stroke();
       ctx.fillStyle = '#475569';
-      ctx.fillRect(-19, -68, 5, 68);
-      ctx.fillRect(14, -68, 5, 68);
-      ctx.strokeRect(-19, -68, 5, 68);
-      ctx.strokeRect(14, -68, 5, 68);
+      ctx.fillRect(-18, -68, 4, 68);
+      ctx.fillRect(14, -68, 4, 68);
 
-      const happyJump = p.rescued ? Math.abs(Math.sin(Date.now() * 0.012)) * 22 : 0;
+      const happyJump = p.rescued ? Math.abs(Math.sin(Date.now() * 0.012)) * 18 : 0;
       ctx.save();
       ctx.translate(0, -happyJump);
 
-      // Piernitas y zapatos rosas
-      ctx.fillStyle = '#fbd3b0';
-      ctx.fillRect(-10, -22, 7, 15);
-      ctx.fillRect(3, -22, 7, 15);
-      ctx.strokeRect(-10, -22, 7, 15);
-      ctx.strokeRect(3, -22, 7, 15);
+      // Piernas humanas proporcionadas de niña y zapatillas
+      ctx.fillStyle = '#f1c6a7';
+      ctx.fillRect(-8, -28, 5.5, 22);
+      ctx.fillRect(2.5, -28, 5.5, 22);
 
       ctx.fillStyle = '#ec4899';
       ctx.beginPath();
-      ctx.roundRect(-14, -9, 13, 9, 4);
-      ctx.roundRect(1, -9, 13, 9, 4);
+      ctx.roundRect(-10, -8, 9.5, 7, 3);
+      ctx.roundRect(1.5, -8, 9.5, 7, 3);
       ctx.fill();
-      ctx.stroke();
 
-      // Vestido colorido alegre
-      const dressGrad = ctx.createLinearGradient(-18, -56, 18, -18);
-      dressGrad.addColorStop(0, '#f472b6');
-      dressGrad.addColorStop(0.35, '#fbbf24');
-      dressGrad.addColorStop(0.7, '#38bdf8');
-      dressGrad.addColorStop(1, '#a855f7');
+      // Vestido realista
+      const dressGrad = ctx.createLinearGradient(-15, -62, 15, -24);
+      dressGrad.addColorStop(0, '#ec4899');
+      dressGrad.addColorStop(0.5, '#a855f7');
+      dressGrad.addColorStop(1, '#6366f1');
       ctx.fillStyle = dressGrad;
       ctx.beginPath();
-      ctx.moveTo(-13, -54);
-      ctx.lineTo(13, -54);
-      ctx.lineTo(21, -18);
-      ctx.lineTo(-21, -18);
+      ctx.moveTo(-11, -60);
+      ctx.lineTo(11, -60);
+      ctx.lineTo(16, -24);
+      ctx.lineTo(-16, -24);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
 
+      // Brazos humanos proporcionados
+      ctx.fillStyle = '#f1c6a7';
       if (!p.tied) {
-        ctx.fillStyle = '#fbd3b0';
         ctx.beginPath();
-        ctx.roundRect(-25, -74, 9, 24, 4);
-        ctx.roundRect(16, -74, 9, 24, 4);
+        ctx.roundRect(-19, -76, 6, 22, 3);
+        ctx.roundRect(13, -76, 6, 22, 3);
         ctx.fill();
-        ctx.stroke();
+      } else {
+        ctx.beginPath();
+        ctx.roundRect(-15, -58, 5.5, 20, 3);
+        ctx.roundRect(9.5, -58, 5.5, 20, 3);
+        ctx.fill();
       }
 
-      // Cabeza grande infantil estilo Lola/Lana (The Loud House)
+      // Cabeza humana realista de niña (8 años)
       ctx.save();
-      ctx.translate(0, -82);
-      ctx.scale(-1.18, 1.18);
+      ctx.translate(0, -78);
+      ctx.scale(-0.88, 0.88);
 
-      const piliHair = ctx.createLinearGradient(-24, -34, 24, 28);
-      piliHair.addColorStop(0, '#854d27');
-      piliHair.addColorStop(0.5, '#5c3418');
-      piliHair.addColorStop(1, '#3b1f0c');
-      ctx.fillStyle = piliHair;
-      ctx.beginPath();
-      ctx.arc(-2, 2, 28, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
+      if (!CHAR_FACES.pili.ready) {
+        const piliHair = ctx.createLinearGradient(-18, -28, 18, 24);
+        piliHair.addColorStop(0, '#6b3e23');
+        piliHair.addColorStop(0.5, '#4a2916');
+        piliHair.addColorStop(1, '#2d180b');
+        ctx.fillStyle = piliHair;
+        ctx.beginPath();
+        ctx.moveTo(-16, -18);
+        ctx.bezierCurveTo(-22, 0, -22, 18, -14, 28);
+        ctx.lineTo(14, 28);
+        ctx.bezierCurveTo(22, 18, 22, 0, 16, -18);
+        ctx.bezierCurveTo(10, -28, -10, -28, -16, -18);
+        ctx.closePath();
+        ctx.fill();
+      }
 
-      drawLoudCartoonHead(ctx, {
+      drawRealisticHumanHead(ctx, {
+        photoKey: 'pili',
+        skinBase: '#f3cbb0',
+        skinShadow: '#d5a17e',
         isChild: true,
+        isFemale: true,
         smile: true,
-        mouthOpen: p.rescued,
-        freckles: true
+        mouthOpen: p.rescued
       });
 
-      // Flequillo redondeado con hebilla violeta
-      ctx.fillStyle = piliHair;
-      ctx.beginPath();
-      ctx.moveTo(-23, -14);
-      ctx.bezierCurveTo(-20, -38, 20, -38, 24, -14);
-      ctx.quadraticCurveTo(4, -25, -23, -14);
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.fillStyle = '#c084fc';
-      ctx.beginPath();
-      ctx.arc(-10, -23, 6, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-      ctx.fillStyle = '#fef08a';
-      ctx.beginPath();
-      ctx.arc(-10, -23, 2.4, 0, Math.PI * 2);
-      ctx.fill();
+      if (!CHAR_FACES.pili.ready) {
+        ctx.fillStyle = '#4a2916';
+        ctx.beginPath();
+        ctx.moveTo(-15, -13);
+        ctx.bezierCurveTo(-14, -27, 14, -27, 15, -13);
+        ctx.quadraticCurveTo(0, -20, -15, -13);
+        ctx.fill();
+      }
 
       ctx.restore();
 
       if (p.tied) {
         ctx.strokeStyle = '#d97706';
-        ctx.lineWidth = 4.2;
-        for (let ry = -44; ry <= -30; ry += 7) {
+        ctx.lineWidth = 3.4;
+        for (let ry = -48; ry <= -34; ry += 7) {
           ctx.beginPath();
-          ctx.moveTo(-19, ry); ctx.lineTo(19, ry);
+          ctx.moveTo(-16, ry); ctx.lineTo(16, ry);
           ctx.stroke();
         }
         const awakeLeft = fans.filter(fn => !fn.pacified).length;
         const msg = (boss && boss.defeated && awakeLeft > 0)
           ? `¡FALTAN DORMIR ${awakeLeft} FANS!`
           : '¡VAMOS PATO! ¡RESCATAME!';
-        drawComicSpeechBubble(ctx, 0, -134, msg, '#ffffff', '#dc2626');
+        drawComicSpeechBubble(ctx, 0, -124, msg, '#ffffff', '#dc2626');
       } else {
-        drawComicSpeechBubble(ctx, 0, -140, '¡GRACIAS PATO! ¡AGUANTE AIRBAG!', '#fef08a', '#09090b');
+        drawComicSpeechBubble(ctx, 0, -128, '¡GRACIAS PATO! ¡AGUANTE AIRBAG!', '#fef08a', '#09090b');
       }
 
       ctx.restore();
@@ -1956,44 +2034,36 @@
         ctx.fill();
         ctx.stroke();
 
-        // Cabeza cartoon sentada durmiendo (con ojos cerrados)
+        // Cabeza humana realista sentada durmiendo (con ojos cerrados)
         ctx.save();
-        ctx.translate(2, -70 + sleepNod);
+        ctx.translate(2, -68 + sleepNod);
         ctx.rotate(0.12);
-        ctx.scale(1.05, 1.05);
+        ctx.scale(0.9, 0.9);
 
         if (isFemale) {
-          // Pelo largo o colita alta estilo Leni / Luan de The Loud House
           ctx.fillStyle = f.hairColor;
           ctx.beginPath();
-          ctx.ellipse(-18, -4, 14, 24, 0.25, 0, Math.PI * 2);
+          ctx.ellipse(-13, 0, 10, 20, 0.2, 0, Math.PI * 2);
           ctx.fill();
-          ctx.stroke();
         }
 
-        drawLoudCartoonHead(ctx, {
+        drawRealisticHumanHead(ctx, {
           isFemale,
           sleeping: true,
-          smile: true,
-          freckles: true
+          smile: true
         });
 
-        // Pelo superior / vincha
+        // Pelo superior humano
         ctx.fillStyle = f.hairColor;
-        ctx.strokeStyle = '#09090b';
-        ctx.lineWidth = 3.2;
         ctx.beginPath();
-        ctx.arc(-1, -21, 24, Math.PI * 0.9, Math.PI * 2.1);
+        ctx.arc(0, -16, 17, Math.PI * 0.92, Math.PI * 2.08);
         ctx.fill();
-        ctx.stroke();
 
         if (isFemale) {
-          // Vincha / gomita colorida estilo Loud House
           ctx.fillStyle = '#f472b6';
           ctx.beginPath();
-          ctx.arc(-14, -26, 6, 0, Math.PI * 2);
+          ctx.arc(-11, -20, 4, 0, Math.PI * 2);
           ctx.fill();
-          ctx.stroke();
         }
         ctx.restore();
         ctx.restore();
@@ -2041,7 +2111,7 @@
       ctx.fill();
       ctx.stroke();
 
-      // Si es fan mujer, pollera rockera estilo Luna/Luan
+      // Si es fan mujer, pollera rockera
       if (isFemale) {
         ctx.fillStyle = f.skirtColor || '#db2777';
         ctx.beginPath();
@@ -2059,42 +2129,34 @@
       ctx.textAlign = 'center';
       ctx.fillText('AIRBAG', 0, -55);
 
-      // Cabeza cartoon grande estilo Loud House
+      // Cabeza humana proporcionada
       ctx.save();
-      ctx.translate(0, -100);
-      ctx.scale(1.06, 1.06);
+      ctx.translate(0, -94);
+      ctx.scale(0.9, 0.9);
 
       if (isFemale) {
-        // Melena / colita lateral estilo Leni / Luan
         ctx.fillStyle = f.hairColor;
         ctx.beginPath();
-        ctx.ellipse(-19, -2, 13, 25, 0.22, 0, Math.PI * 2);
+        ctx.ellipse(-13, 0, 10, 21, 0.2, 0, Math.PI * 2);
         ctx.fill();
-        ctx.stroke();
       }
 
-      drawLoudCartoonHead(ctx, {
+      drawRealisticHumanHead(ctx, {
         isFemale,
         smile: true,
-        mouthOpen: Math.sin(f.anim * 0.2) > 0.45,
-        freckles: true
+        mouthOpen: Math.sin(f.anim * 0.2) > 0.45
       });
 
       ctx.fillStyle = f.hairColor;
-      ctx.strokeStyle = '#09090b';
-      ctx.lineWidth = 3.2;
       ctx.beginPath();
-      ctx.arc(-1, -21, 24, Math.PI * 0.92, Math.PI * 2.08);
+      ctx.arc(0, -16, 17, Math.PI * 0.92, Math.PI * 2.08);
       ctx.fill();
-      ctx.stroke();
 
       if (isFemale) {
-        // Gomita / hebilla estilo Loud House
         ctx.fillStyle = '#f472b6';
         ctx.beginPath();
-        ctx.arc(-14, -26, 6, 0, Math.PI * 2);
+        ctx.arc(-11, -20, 4, 0, Math.PI * 2);
         ctx.fill();
-        ctx.stroke();
       }
       ctx.restore();
 
@@ -2150,34 +2212,29 @@
       ctx.roundRect(x + 3, y + 3, size - 6, size - 6, 9);
       ctx.clip();
 
+      if (CHAR_FACES[who] && CHAR_FACES[who].ready) {
+        ctx.drawImage(CHAR_FACES[who].img, x + 5, y + 2, size - 10, size + 6);
+        ctx.restore();
+        return;
+      }
+
       ctx.translate(x + size / 2, y + size / 2 + 6);
-      ctx.scale(0.95, 0.95);
+      ctx.scale(1.15, 1.15);
 
       if (who === 'pato') {
-        drawLoudCartoonHead(ctx, { hasBeard: true, beardStyle: 'pato', sunglasses: true, smile: true });
-        ctx.fillStyle = '#9c7344';
-        ctx.strokeStyle = '#09090b';
-        ctx.lineWidth = 2.8;
-        ctx.beginPath();
-        ctx.arc(0, -22, 23, Math.PI, 0);
-        ctx.fill();
-        ctx.stroke();
+        drawRealisticHumanHead(ctx, { photoKey: 'pato', hasBeard: true, beardStyle: 'pato', eyebrowSlit: true });
       } else if (who === 'guido') {
-        drawLoudCartoonHead(ctx, { hasBeard: true, beardStyle: 'guido', eyebrowSlit: true, smile: true });
+        drawRealisticHumanHead(ctx, { photoKey: 'guido', hasBeard: true, beardStyle: 'guido', eyebrowSlit: true });
         ctx.fillStyle = '#18181b';
         ctx.beginPath();
-        ctx.arc(0, -20, 24, Math.PI, 0);
+        ctx.arc(0, -16, 17.5, Math.PI, 0);
         ctx.fill();
-        ctx.stroke();
       } else {
         ctx.fillStyle = '#eab308';
-        ctx.strokeStyle = '#09090b';
-        ctx.lineWidth = 2.8;
         ctx.beginPath();
-        ctx.arc(0, -4, 27, 0, Math.PI * 2);
+        ctx.arc(0, -4, 21, 0, Math.PI * 2);
         ctx.fill();
-        ctx.stroke();
-        drawLoudCartoonHead(ctx, { smile: true });
+        drawRealisticHumanHead(ctx, { photoKey: 'gaston', hasBeard: true });
       }
 
       ctx.restore();
@@ -3055,7 +3112,7 @@
 
       ctx.font = '900 14px "Montserrat"';
       ctx.fillStyle = '#fde047';
-      ctx.fillText('ESTILO CARTOON "THE LOUD HOUSE" • PERSONAJES GRANDES • AUDIO AIRBAG MP3', W / 2, 126);
+      ctx.fillText('DISEÑO HUMANO REALISTA • ROSTRO REAL DE PATO SARDELLI • AUDIO AIRBAG MP3', W / 2, 126);
       ctx.restore();
 
       // Desfile de personajes grandes en portada
