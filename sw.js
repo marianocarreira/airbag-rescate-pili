@@ -1,10 +1,15 @@
-const CACHE_NAME = 'airbag-rescate-pili-v3';
+const CACHE_NAME = 'airbag-rescate-pili-v4';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './icon.svg',
   './pato_face.png',
+  './guido_face.png',
+  './guido_face_smile.png',
+  './gaston_face.png',
+  './pili_face.png',
+  './pili_face_rock.png',
   './airbag.mp3'
 ];
 

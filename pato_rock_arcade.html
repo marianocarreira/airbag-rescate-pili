@@ -634,13 +634,15 @@
     const CHAR_SCALE = 1.42;
 
     // ============================================================================
-    // CARGA DE ROSTROS REALES EXACTOS DE LOS PERSONAJES PRINCIPALES
+    // CARGA DE ROSTROS REALES EXACTOS DE LOS 4 PERSONAJES PRINCIPALES
     // ============================================================================
     const CHAR_FACES = {
       pato: { img: new Image(), ready: false, src: 'pato_face.png' },
       guido: { img: new Image(), ready: false, src: 'guido_face.png' },
+      guido_smile: { img: new Image(), ready: false, src: 'guido_face_smile.png' },
       gaston: { img: new Image(), ready: false, src: 'gaston_face.png' },
-      pili: { img: new Image(), ready: false, src: 'pili_face.png' }
+      pili: { img: new Image(), ready: false, src: 'pili_face.png' },
+      pili_rock: { img: new Image(), ready: false, src: 'pili_face_rock.png' }
     };
 
     Object.keys(CHAR_FACES).forEach((k) => {
@@ -652,7 +654,7 @@
 
     // ============================================================================
     // CABEZA HUMANA REALISTA (PROPORCIONES ANATÓMICAS REALES, ROSTRO FOTOGRÁFICO
-    // EXACTO CUANDO ESTÁ DISPONIBLE O FACCIONES HUMANAS REALISTAS SIN CARTOON)
+    // EXACTO DE PATO, GUIDO, GASTÓN Y PILI)
     // ============================================================================
     function drawRealisticHumanHead(ctx, opts = {}) {
       const {
@@ -687,11 +689,16 @@
       ctx.roundRect(-neckW / 2, 13, neckW, 16, 4);
       ctx.fill();
 
-      // Si el personaje tiene su foto real cargada (ej. Pato Sardelli), renderizar su cara real exacta
+      // Si el personaje tiene su foto real cargada (Pato, Guido, Gastón o Pili), renderizar su cara real exacta
       if (photoKey && CHAR_FACES[photoKey] && CHAR_FACES[photoKey].ready) {
-        const faceEntry = CHAR_FACES[photoKey];
+        let faceEntry = CHAR_FACES[photoKey];
+        if (photoKey === 'guido' && mouthOpen && CHAR_FACES.guido_smile && CHAR_FACES.guido_smile.ready) {
+          faceEntry = CHAR_FACES.guido_smile;
+        } else if (photoKey === 'pili' && mouthOpen && CHAR_FACES.pili_rock && CHAR_FACES.pili_rock.ready) {
+          faceEntry = CHAR_FACES.pili_rock;
+        }
 
-        // Mechones largos rubios/castaños cayendo sobre los hombros detrás de la cara (fiel a las fotos de Pato)
+        // Mechones largos cayendo sobre los hombros según cada personaje
         if (photoKey === 'pato') {
           const longHairGrad = ctx.createLinearGradient(-26, -10, 26, 42);
           longHairGrad.addColorStop(0, '#4a3319');
@@ -717,12 +724,40 @@
             ctx.fill();
           }
           ctx.restore();
+        } else if (photoKey === 'guido') {
+          // Melena rubia ondulada sobre los hombros de Guido
+          const guidoHair = ctx.createLinearGradient(-26, -12, 26, 40);
+          guidoHair.addColorStop(0, '#a16207');
+          guidoHair.addColorStop(0.5, '#eab308');
+          guidoHair.addColorStop(1, '#ca8a04');
+          ctx.fillStyle = guidoHair;
+          ctx.beginPath();
+          ctx.moveTo(-22, -8);
+          ctx.bezierCurveTo(-30, 10, -30, 28, -21, 38);
+          ctx.lineTo(21, 38);
+          ctx.bezierCurveTo(30, 28, 30, 10, 22, -8);
+          ctx.closePath();
+          ctx.fill();
+        } else if (photoKey === 'pili') {
+          // Pelo castaño largo sobre los hombros de Pili
+          const piliHair = ctx.createLinearGradient(-22, -8, 22, 36);
+          piliHair.addColorStop(0, '#5c3a21');
+          piliHair.addColorStop(0.6, '#7c4d2b');
+          piliHair.addColorStop(1, '#432818');
+          ctx.fillStyle = piliHair;
+          ctx.beginPath();
+          ctx.moveTo(-18, -4);
+          ctx.bezierCurveTo(-24, 12, -24, 26, -17, 35);
+          ctx.lineTo(17, 35);
+          ctx.bezierCurveTo(24, 26, 24, 12, 18, -4);
+          ctx.closePath();
+          ctx.fill();
         }
 
         // Dibujar la foto real recortada con alta nitidez
         ctx.save();
-        const fw = isChild ? 40 : 48;
-        const fh = isChild ? 54 : 66;
+        const fw = isChild ? 44 : 48;
+        const fh = isChild ? 58 : 66;
         ctx.drawImage(faceEntry.img, -fw / 2, -40, fw, fh);
         ctx.restore();
 
@@ -1317,7 +1352,10 @@
     }
 
     // ============================================================================
-    // 2. GUIDO SARDELLI (JEFE NIVEL 1 - DISEÑO HUMANO REALISTA, NO CARTOON)
+    // 2. GUIDO SARDELLI (JEFE NIVEL 1 - DISEÑO HUMANO REALISTA + CARA REAL EXACTA)
+    //    Basado en sus fotos reales: Melena rubia ondulada, camiseta roja y negra
+    //    BULLS, bermuda negra, medias negras con rayas blancas "96", pulseras
+    //    plateadas, guitarra Fender Telecaster Deluxe negra y sintetizador rojo.
     // ============================================================================
     function drawGuidoHD(b) {
       ctx.save();
@@ -1333,16 +1371,29 @@
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
 
-      // Piernas humanas realistas con pantalón oscuro y botas
-      for (const lx of [-13, 6]) {
+      // Piernas humanas realistas con bermuda negra y medias deportivas negras con rayas blancas "96" (Foto 1 y 3)
+      for (const lx of [-13, 5]) {
+        // Pierna desnuda (rodilla/pantorrilla)
+        ctx.fillStyle = '#e8be9e';
+        ctx.fillRect(lx + 1, -38, 9, 24);
+
+        // Bermuda negra (Foto 2 y 3)
         ctx.fillStyle = '#18181b';
         ctx.strokeStyle = '#09090b';
-        ctx.lineWidth = 1.8;
+        ctx.lineWidth = 1.6;
         ctx.beginPath();
-        ctx.roundRect(lx, -56, 11, 50, 4);
+        ctx.roundRect(lx - 1, -58, 13, 24, 3);
         ctx.fill();
         ctx.stroke();
 
+        // Medias negras con rayas blancas (Foto 1 y 3)
+        ctx.fillStyle = '#09090b';
+        ctx.fillRect(lx + 1, -20, 9, 13);
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillRect(lx + 1, -18, 9, 1.6);
+        ctx.fillRect(lx + 1, -15, 9, 1.6);
+
+        // Zapatillas negras
         ctx.fillStyle = '#09090b';
         ctx.beginPath();
         ctx.roundRect(lx - 2, -9, 15, 9, 3);
@@ -1352,90 +1403,79 @@
       ctx.save();
       ctx.translate(0, -56 - groove);
 
-      // Torso humano realista con remera deportiva negra #10
-      const jerseyGrad = ctx.createLinearGradient(-24, -56, 24, 0);
-      jerseyGrad.addColorStop(0, '#27272a');
-      jerseyGrad.addColorStop(1, '#09090b');
-      ctx.fillStyle = jerseyGrad;
+      // Torso humano realista con la camiseta roja y negra BULLS de la Foto 2 de Guido
+      ctx.fillStyle = '#dc2626'; // Hombros y mangas rojas
       ctx.strokeStyle = '#09090b';
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(-22, -54);
-      ctx.lineTo(22, -54);
-      ctx.lineTo(26, -32);
-      ctx.lineTo(18, -30);
-      ctx.lineTo(16, 4);
-      ctx.lineTo(-16, 4);
-      ctx.lineTo(-18, -30);
-      ctx.lineTo(-26, -32);
+      ctx.moveTo(-23, -55);
+      ctx.lineTo(23, -55);
+      ctx.lineTo(27, -31);
+      ctx.lineTo(18, -29);
+      ctx.lineTo(17, 4);
+      ctx.lineTo(-17, 4);
+      ctx.lineTo(-18, -29);
+      ctx.lineTo(-27, -31);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
 
-      // Brazos humanos tocando el sintetizador
+      // Pecho negro de la camiseta Bulls (Foto 2)
+      ctx.fillStyle = '#141417';
+      ctx.beginPath();
+      ctx.roundRect(-17, -39, 34, 42, 2);
+      ctx.fill();
+
+      // Cuello en V blanco/rojo/negro (Foto 2)
+      ctx.strokeStyle = '#f8fafc';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-8, -55);
+      ctx.lineTo(0, -45);
+      ctx.lineTo(8, -55);
+      ctx.stroke();
+
+      // Texto "BULLS" rojo con borde blanco en el pecho (Foto 2)
+      ctx.font = '900 12px "Montserrat"';
+      ctx.textAlign = 'center';
+      ctx.strokeStyle = '#f8fafc';
+      ctx.lineWidth = 2.4;
+      ctx.strokeText('BULLS', 0, -24);
+      ctx.fillStyle = '#dc2626';
+      ctx.fillText('BULLS', 0, -24);
+
+      // Brazos humanos con las pulseras plateadas características de Guido (Foto 1 y 2)
       ctx.fillStyle = '#e8be9e';
       ctx.beginPath();
-      ctx.roundRect(-25, -32, 8, 22, 4);
-      ctx.roundRect(17, -32, 8, 22, 4);
+      ctx.roundRect(-25, -31, 8, 22, 4);
+      ctx.roundRect(17, -31, 8, 22, 4);
       ctx.fill();
 
-      ctx.font = '900 18px "Montserrat"';
-      ctx.fillStyle = '#f8fafc';
-      ctx.textAlign = 'center';
-      ctx.fillText('10', 0, -24);
-
-      // Cabeza humana proporcionada de Guido (no cabezón cartoon)
-      ctx.save();
-      ctx.translate(0, -78);
-      ctx.scale(-0.92, 0.92);
-
-      // Pelo rubio/castaño atado atrás
-      ctx.fillStyle = '#b89352';
+      // Pulseras plateadas en la muñeca izquierda (Foto 1 y 2)
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 1.6;
       ctx.beginPath();
-      ctx.moveTo(-14, 0);
-      ctx.quadraticCurveTo(-24, 12, -18, 26);
-      ctx.quadraticCurveTo(-10, 18, -10, 2);
-      ctx.closePath();
-      ctx.fill();
+      ctx.moveTo(17, -15); ctx.lineTo(25, -15);
+      ctx.moveTo(17, -13); ctx.lineTo(25, -13);
+      ctx.stroke();
+
+      // Cabeza humana proporcionada de Guido con su cara real exacta (guido_face.png)
+      ctx.save();
+      ctx.translate(0, -80);
+      ctx.scale(0.95, 0.95);
 
       drawRealisticHumanHead(ctx, {
         photoKey: 'guido',
-        hasBeard: true,
-        beardStyle: 'guido',
+        hasBeard: false,
         sunglasses: false,
-        mouthOpen: !b.defeated && Math.sin(b.anim * 0.2) > 0.25,
-        smile: false,
-        eyebrowSlit: true
+        mouthOpen: !b.defeated && Math.sin(b.anim * 0.2) > 0.2,
+        smile: true
       });
 
-      if (!CHAR_FACES.guido.ready) {
-        // Gorra hacia atrás proporcionada realista
-        ctx.fillStyle = '#18181b';
-        ctx.strokeStyle = '#09090b';
-        ctx.lineWidth = 1.6;
-        ctx.beginPath();
-        ctx.arc(0, -16, 17.5, Math.PI * 0.96, Math.PI * 2.04);
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.fillStyle = '#d4af73';
-        ctx.beginPath();
-        ctx.arc(4, -16, 5.2, Math.PI, 0);
-        ctx.fill();
-        ctx.fillStyle = '#18181b';
-        ctx.fillRect(-1, -17.5, 11, 2.8);
-
-        // Visera hacia atrás
-        ctx.fillStyle = '#09090b';
-        ctx.beginPath();
-        ctx.roundRect(-27, -19, 12, 5, 2.5);
-        ctx.fill();
-      }
-
       ctx.restore();
       ctx.restore();
 
-      // Sintetizador / Teclado Nord Stage Rojo realista en primer plano
+      // Sintetizador / Teclado Rojo + Guitarra en el puesto de Guido
       ctx.strokeStyle = '#94a3b8';
       ctx.lineWidth = 4.5;
       ctx.beginPath();
@@ -1466,7 +1506,10 @@
     }
 
     // ============================================================================
-    // 3. GASTÓN SARDELLI (JEFE NIVEL 2 - DISEÑO HUMANO REALISTA, NO CARTOON)
+    // 3. GASTÓN SARDELLI (JEFE NIVEL 2 - DISEÑO HUMANO REALISTA + CARA REAL EXACTA)
+    //    Basado en sus fotos reales: Pelo corto rubio platinado, barba corta,
+    //    camiseta blanca con banda roja cruzada (Foto 1), muñequera doble rosa y
+    //    negra en el brazo derecho, jean negro con rotura en la rodilla y Bajo Fender.
     // ============================================================================
     function drawGastonHD(b) {
       ctx.save();
@@ -1483,97 +1526,140 @@
       if (!b.facingRight) ctx.scale(-1, 1);
 
       const bounce = Math.sin(b.anim * 0.24) * 3.5;
-      const jumpSpread = b.z > 20 ? 0.28 : Math.sin(b.anim * 0.24) * 0.1;
+      const jumpSpread = b.z > 20 ? 0.24 : Math.sin(b.anim * 0.24) * 0.09;
 
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
 
-      // Piernas humanas realistas con bermudas deportivas y zapatillas Bulls
+      // Piernas humanas realistas con jean negro ajustado y rotura en la rodilla (Foto 1 y 5)
       for (let side of [-1, 1]) {
         ctx.save();
         ctx.translate(side * 9, -56);
         ctx.rotate(side * jumpSpread);
-        // Pantorrilla humana
-        ctx.fillStyle = '#e8be9e';
-        ctx.fillRect(-4.5, 22, 9, 26);
-        // Bermuda negra deportiva
+
         ctx.fillStyle = '#18181b';
         ctx.strokeStyle = '#09090b';
-        ctx.lineWidth = 1.6;
+        ctx.lineWidth = 1.8;
         ctx.beginPath();
-        ctx.roundRect(-8.5, -2, 17, 26, 3);
+        ctx.roundRect(-6.5, 0, 13, 48, 4);
         ctx.fill();
         ctx.stroke();
-        // Zapatilla deportiva roja y negra
-        ctx.fillStyle = '#dc2626';
+
+        // Rotura en la rodilla del jean negro (exacto a la Foto 1 de Gastón)
+        if (side === 1) {
+          ctx.fillStyle = '#e8be9e';
+          ctx.beginPath();
+          ctx.ellipse(0, 24, 3.8, 2.2, 0, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Botas / zapatillas negras rockeras
+        ctx.fillStyle = '#09090b';
         ctx.beginPath();
-        ctx.roundRect(-6, 44, 19, 10, 4);
+        ctx.roundRect(-6, 45, 18, 10, 3.5);
         ctx.fill();
         ctx.stroke();
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(-6, 51, 19, 2.8);
         ctx.restore();
       }
 
       ctx.save();
       ctx.translate(0, -56 - bounce);
 
-      // Brazos humanos atléticos
-      ctx.fillStyle = '#e8be9e';
-      ctx.strokeStyle = '#b48364';
-      ctx.lineWidth = 1.2;
-      ctx.beginPath();
-      ctx.roundRect(-27, -50, 9, 32, 4.5);
-      ctx.roundRect(18, -50, 9, 32, 4.5);
-      ctx.fill();
-      ctx.stroke();
-
-      // Camiseta Chicago Bulls #31 con proporciones humanas realistas
-      const bullsGrad = ctx.createLinearGradient(-20, -56, 20, 2);
-      bullsGrad.addColorStop(0, '#dc2626');
-      bullsGrad.addColorStop(1, '#991b1b');
-      ctx.fillStyle = bullsGrad;
+      // Camiseta blanca con la banda roja diagonal (Foto 1 de Gastón)
+      ctx.fillStyle = '#f8fafc';
       ctx.strokeStyle = '#09090b';
       ctx.lineWidth = 1.8;
       ctx.beginPath();
-      ctx.roundRect(-19, -54, 38, 56, 5);
+      ctx.moveTo(-22, -54);
+      ctx.lineTo(22, -54);
+      ctx.lineTo(26, -32);
+      ctx.lineTo(18, -30);
+      ctx.lineTo(17, 4);
+      ctx.lineTo(-17, 4);
+      ctx.lineTo(-18, -30);
+      ctx.lineTo(-26, -32);
+      ctx.closePath();
       ctx.fill();
       ctx.stroke();
 
-      ctx.font = '900 10px "Montserrat"';
-      ctx.textAlign = 'center';
-      ctx.fillStyle = '#ffffff';
-      ctx.fillText('BULLS', 0, -30);
-
-      ctx.font = '900 16px "Montserrat"';
-      ctx.fillStyle = '#18181b';
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 2;
-      ctx.strokeText('31', 0, -12);
-      ctx.fillText('31', 0, -12);
-
-      // Cabeza humana realista de Gastón con melena rubia rockera natural
+      // Banda roja diagonal cruzando el pecho (Foto 1)
       ctx.save();
-      ctx.translate(0, -78);
-      ctx.scale(0.92, 0.92);
+      ctx.beginPath();
+      ctx.roundRect(-17, -54, 34, 58, 3);
+      ctx.clip();
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath();
+      ctx.moveTo(12, -54);
+      ctx.lineTo(22, -46);
+      ctx.lineTo(-14, -4);
+      ctx.lineTo(-22, -14);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
 
-      if (!CHAR_FACES.gaston.ready) {
-        const hairGrad = ctx.createLinearGradient(-22, -28, 22, 28);
-        hairGrad.addColorStop(0, '#fde047');
-        hairGrad.addColorStop(0.5, '#ca8a04');
-        hairGrad.addColorStop(1, '#854d0e');
+      // Correa marrón claro de cuero en el hombro izquierdo (Foto 1)
+      ctx.fillStyle = '#d4a373';
+      ctx.strokeStyle = '#09090b';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(5, -54);
+      ctx.lineTo(13, -54);
+      ctx.lineTo(9, -12);
+      ctx.lineTo(2, -12);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
 
-        // Melena rubia ondulada cayendo sobre los hombros
-        ctx.fillStyle = hairGrad;
-        ctx.beginPath();
-        ctx.moveTo(-18, -22);
-        ctx.bezierCurveTo(-26, -6, -27, 16, -20, 28);
-        ctx.lineTo(20, 28);
-        ctx.bezierCurveTo(27, 16, 26, -6, 18, -22);
-        ctx.bezierCurveTo(10, -32, -10, -32, -18, -22);
-        ctx.closePath();
-        ctx.fill();
-      }
+      // Brazo izquierdo sosteniendo el mástil del Bajo Fender
+      ctx.fillStyle = '#e8be9e';
+      ctx.beginPath();
+      ctx.roundRect(17, -34, 24, 8, 4);
+      ctx.fill();
+
+      // Bajo eléctrico Fender Jazz Bass plateado/negro desgastado de 4 cuerdas (Foto 1, 4 y 5)
+      ctx.save();
+      ctx.translate(4, -14);
+      ctx.rotate(-0.36);
+
+      const bassGrad = ctx.createRadialGradient(-2, 0, 2, -2, 0, 26);
+      bassGrad.addColorStop(0, '#cbd5e1');
+      bassGrad.addColorStop(0.55, '#475569');
+      bassGrad.addColorStop(1, '#0f172a');
+      ctx.fillStyle = bassGrad;
+      ctx.strokeStyle = '#f8fafc';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.ellipse(-4, 0, 24, 14, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Mástil largo de bajo de 4 cuerdas
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(16, -3.2, 48, 6.4);
+      ctx.fillStyle = '#09090b';
+      ctx.beginPath();
+      ctx.roundRect(62, -5, 15, 9, 2);
+      ctx.fill();
+      ctx.restore();
+
+      // Brazo derecho humano con la doble muñequera ROSA y NEGRA (exacto a las Fotos 1 y 3 de Gastón)
+      ctx.save();
+      ctx.translate(-19, -36);
+      ctx.fillStyle = '#e8be9e';
+      ctx.beginPath();
+      ctx.roundRect(-4, 0, 8.5, 22, 4);
+      ctx.fill();
+      // Muñequera rosa arriba + muñequera negra abajo (Foto 1)
+      ctx.fillStyle = '#f472b6';
+      ctx.fillRect(-4.2, 10, 9, 4.5);
+      ctx.fillStyle = '#18181b';
+      ctx.fillRect(-4.2, 14.5, 9, 4.5);
+      ctx.restore();
+
+      // Cabeza humana realista de Gastón con su cara real exacta (gaston_face.png)
+      ctx.save();
+      ctx.translate(0, -80);
+      ctx.scale(0.95, 0.95);
 
       drawRealisticHumanHead(ctx, {
         photoKey: 'gaston',
@@ -1581,20 +1667,8 @@
         beardStyle: 'gaston',
         sunglasses: false,
         mouthOpen: b.z > 20 || Math.sin(b.anim * 0.18) > 0.35,
-        smile: false
+        smile: true
       });
-
-      if (!CHAR_FACES.gaston.ready) {
-        // Mechones rubios superiores con raya al medio realista
-        ctx.fillStyle = '#eab308';
-        ctx.beginPath();
-        ctx.moveTo(-17, -14);
-        ctx.bezierCurveTo(-16, -29, 0, -28, 0, -19);
-        ctx.bezierCurveTo(0, -28, 16, -29, 17, -14);
-        ctx.quadraticCurveTo(8, -22, 0, -18);
-        ctx.quadraticCurveTo(-8, -22, -17, -14);
-        ctx.fill();
-      }
 
       ctx.restore();
       ctx.restore();
@@ -1602,7 +1676,9 @@
     }
 
     // ============================================================================
-    // 4. PILI (8 AÑOS - PROPORCIÓN HUMANA REALISTA DE NIÑA, NO CARTOON)
+    // 4. PILI (DISEÑO HUMANO REALISTA DE NIÑA + CARA REAL EXACTA DE SUS FOTOS)
+    //    Basada en su Foto 4 y Foto 2: Chaleco negro de AIRBAG con las 3 calaveras
+    //    sobre buzo rosa de mangas largas, pantalón negro y su rostro real exacto.
     // ============================================================================
     function drawPiliHD(p) {
       ctx.save();
@@ -1651,66 +1727,68 @@
       ctx.save();
       ctx.translate(0, -happyJump);
 
-      // Piernas humanas proporcionadas de niña y zapatillas
-      ctx.fillStyle = '#f1c6a7';
-      ctx.fillRect(-8, -28, 5.5, 22);
-      ctx.fillRect(2.5, -28, 5.5, 22);
+      // Pantalón negro realista de Pili (Foto 2 y 4) y zapatillas claras
+      ctx.fillStyle = '#18181b';
+      ctx.fillRect(-8.5, -28, 6.5, 22);
+      ctx.fillRect(2, -28, 6.5, 22);
 
-      ctx.fillStyle = '#ec4899';
+      ctx.fillStyle = '#f8fafc';
+      ctx.strokeStyle = '#09090b';
+      ctx.lineWidth = 1.4;
       ctx.beginPath();
-      ctx.roundRect(-10, -8, 9.5, 7, 3);
-      ctx.roundRect(1.5, -8, 9.5, 7, 3);
-      ctx.fill();
-
-      // Vestido realista
-      const dressGrad = ctx.createLinearGradient(-15, -62, 15, -24);
-      dressGrad.addColorStop(0, '#ec4899');
-      dressGrad.addColorStop(0.5, '#a855f7');
-      dressGrad.addColorStop(1, '#6366f1');
-      ctx.fillStyle = dressGrad;
-      ctx.beginPath();
-      ctx.moveTo(-11, -60);
-      ctx.lineTo(11, -60);
-      ctx.lineTo(16, -24);
-      ctx.lineTo(-16, -24);
-      ctx.closePath();
+      ctx.roundRect(-10.5, -8, 10, 7, 3);
+      ctx.roundRect(1.5, -8, 10, 7, 3);
       ctx.fill();
       ctx.stroke();
 
-      // Brazos humanos proporcionados
-      ctx.fillStyle = '#f1c6a7';
+      // Mangas largas rosas debajo del chaleco negro de Airbag (Foto 4 de Pili)
+      ctx.fillStyle = '#f4abc4';
+      ctx.strokeStyle = '#09090b';
+      ctx.lineWidth = 1.5;
       if (!p.tied) {
         ctx.beginPath();
-        ctx.roundRect(-19, -76, 6, 22, 3);
-        ctx.roundRect(13, -76, 6, 22, 3);
+        ctx.roundRect(-20, -76, 6.5, 24, 3);
+        ctx.roundRect(13.5, -76, 6.5, 24, 3);
         ctx.fill();
+        ctx.stroke();
       } else {
         ctx.beginPath();
-        ctx.roundRect(-15, -58, 5.5, 20, 3);
-        ctx.roundRect(9.5, -58, 5.5, 20, 3);
+        ctx.roundRect(-17, -58, 6.5, 22, 3);
+        ctx.roundRect(10.5, -58, 6.5, 22, 3);
+        ctx.fill();
+        ctx.stroke();
+      }
+
+      // Chaleco negro rockero de AIRBAG con estampa de las 3 calaveras (Foto 4 de Pili)
+      ctx.fillStyle = '#141417';
+      ctx.strokeStyle = '#09090b';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.roundRect(-13, -60, 26, 35, 4);
+      ctx.fill();
+      ctx.stroke();
+
+      // Estampa "AIRBAG" plateada/rosa y las 3 calaveras celestes/rosas en el pecho (Foto 4)
+      ctx.font = '900 5.5px "Montserrat"';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillText('AIRBAG', 0, -49);
+
+      for (const sx of [-5.5, 0, 5.5]) {
+        ctx.fillStyle = '#60a5fa';
+        ctx.beginPath();
+        ctx.arc(sx, -37, 2.6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#f472b6';
+        ctx.beginPath();
+        ctx.arc(sx, -38, 1.4, 0, Math.PI * 2);
         ctx.fill();
       }
 
-      // Cabeza humana realista de niña (8 años)
+      // Cabeza humana realista de Pili con su cara real exacta (pili_face.png / pili_face_rock.png)
       ctx.save();
       ctx.translate(0, -78);
-      ctx.scale(-0.88, 0.88);
-
-      if (!CHAR_FACES.pili.ready) {
-        const piliHair = ctx.createLinearGradient(-18, -28, 18, 24);
-        piliHair.addColorStop(0, '#6b3e23');
-        piliHair.addColorStop(0.5, '#4a2916');
-        piliHair.addColorStop(1, '#2d180b');
-        ctx.fillStyle = piliHair;
-        ctx.beginPath();
-        ctx.moveTo(-16, -18);
-        ctx.bezierCurveTo(-22, 0, -22, 18, -14, 28);
-        ctx.lineTo(14, 28);
-        ctx.bezierCurveTo(22, 18, 22, 0, 16, -18);
-        ctx.bezierCurveTo(10, -28, -10, -28, -16, -18);
-        ctx.closePath();
-        ctx.fill();
-      }
+      ctx.scale(0.94, 0.94);
 
       drawRealisticHumanHead(ctx, {
         photoKey: 'pili',
@@ -1721,15 +1799,6 @@
         smile: true,
         mouthOpen: p.rescued
       });
-
-      if (!CHAR_FACES.pili.ready) {
-        ctx.fillStyle = '#4a2916';
-        ctx.beginPath();
-        ctx.moveTo(-15, -13);
-        ctx.bezierCurveTo(-14, -27, 14, -27, 15, -13);
-        ctx.quadraticCurveTo(0, -20, -15, -13);
-        ctx.fill();
-      }
 
       ctx.restore();
 
@@ -1747,7 +1816,7 @@
           : '¡VAMOS PATO! ¡RESCATAME!';
         drawComicSpeechBubble(ctx, 0, -124, msg, '#ffffff', '#dc2626');
       } else {
-        drawComicSpeechBubble(ctx, 0, -128, '¡GRACIAS PATO! ¡AGUANTE AIRBAG!', '#fef08a', '#09090b');
+        drawComicSpeechBubble(ctx, 0, -128, '¡GRACIAS PATO! ¡AGUANTE AIRBAG! ✌️', '#fef08a', '#09090b');
       }
 
       ctx.restore();
@@ -3112,7 +3181,7 @@
 
       ctx.font = '900 14px "Montserrat"';
       ctx.fillStyle = '#fde047';
-      ctx.fillText('DISEÑO HUMANO REALISTA • ROSTRO REAL DE PATO SARDELLI • AUDIO AIRBAG MP3', W / 2, 126);
+      ctx.fillText('DISEÑO HUMANO REALISTA • CARAS REALES DE PATO, GUIDO, GASTÓN Y PILI • AUDIO AIRBAG MP3', W / 2, 126);
       ctx.restore();
 
       // Desfile de personajes grandes en portada
